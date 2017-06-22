@@ -1,47 +1,38 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-  <meta charset="utf-8">
-  <title>New Book</title>
-</head>
+{% block title %}
+New Book
+{% endblock %}
 
-<body>
+{% block head %}
+{{ super() }}
+{% endblock %}
 
-  <div class="flash">
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <ul>
-      {% for message in messages %}
-      <li><strong>{{ message }}</strong></li>
+{% block content %}
+<h1>New Book</h1>
+
+<form action="{{ url_for('newBook') }}" method="post">
+  <input type="text" name="name" placeholder="Name">
+  <br>
+  <textarea name="description" rows="8" cols="80"></textarea>
+  <br>
+  <select name="genre_id">
+      {% for g in genres %}
+      <option value="{{ g.id }}">{{ g.name }}</option>
       {% endfor %}
-    </ul>
-    {% endif %} {% endwith %}
-  </div>
+    </select>
+  <br>
+  <input type="text" name="cover_image_url" placeholder="Cover image URL">
+  <br>
+  <input type="number" min="1" name="pages_count" placeholder="Pages count">
+  <br>
+  <input type="text" name="author_name" placeholder="Author name">
+  <br>
+  <input type="number" min="1" name="year" placeholder="Year">
+  <br>
+  <input type="number" min="0" , step="0.01" name="price" placeholder="Price">
+  <br>
+  <input type="submit" value="Create">
+</form>
 
-  <h1>New Book</h1>
-  <form action="{{ url_for('newBook') }}" method="post">
-    <input type="text" name="name" placeholder="Name">
-    <br>
-    <textarea name="description" rows="8" cols="80"></textarea>
-    <br>
-    <select name="genre_id">
-        {% for g in genres %}
-        <option value="{{ g.id }}">{{ g.name }}</option>
-        {% endfor %}
-      </select>
-    <br>
-    <input type="text" name="cover_image_url" placeholder="Cover image URL">
-    <br>
-    <input type="number" min="1" name="pages_count" placeholder="Pages count">
-    <br>
-    <input type="text" name="author_name" placeholder="Author name">
-    <br>
-    <input type="number" min="1" name="year" placeholder="Year">
-    <br>
-    <input type="number" min="0" , step="0.01" name="price" placeholder="Price">
-    <br>
-    <input type="submit" value="Create">
-  </form>
-</body>
-
-</html>
+{% endblock %}

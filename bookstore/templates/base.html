@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  {% block head %}
+  <title>
+    {% block title %}{% endblock %} - Flask book store
+  </title>
+  {% endblock %}
+</head>
+
+<body>
+  <a href="/"><h1>Flask Book store</h1></a>
+  <a href="#">Login</a>
+  <br>
+
+  <div class="flash">
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li><strong>{{ message }}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+  </div>
+
+  <div id="content">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+  <div id="footer">
+    {% block footer %}
+    <br><br><br>
+    This is a footer
+    {% endblock %}
+  </div>
+</body>
+
+</html>

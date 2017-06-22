@@ -1,49 +1,33 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Bookstore</title>
-  </head>
-  <body>
-    <h1>Books</h1>
-    <h3><a href="{{ url_for('newBook') }}">Add New Book</a></h3>
-    <ul>
-      {% for b in books %}
-      <li>
-        <h3>{{ b.name }}</h3>
-        {% if b.author_name %}
-        {% endif %}
+{% extends "base.html" %}
 
-        {% if b.cover_image_url %}
-        <img src="{{ b.cover_image_url }}" alt="{{ b.name }}">
-        <br>
-        {% endif %}
+{% block title %}
+Books
+{% endblock %}
 
-        {% if b.author_name %}
-        <p>by {{ b.author_name }} {% if b.year %}{{ b.year }}{% endif %}</p>
-        {% endif %}
+{% block head %}
+{{ super() }}
+{% endblock %}
 
-        <a href="{{ url_for('genre', genre_id=b.genre_id) }}">{{ b.genre.name }}</a>
+{% block content %}
+<h1>Books</h1>
+<h3><a href="{{ url_for('newBook') }}">Add New Book</a></h3>
 
-        {% if b.description %}
-        <p>{{ b.description }}</p>
-        {% endif %}
+<ul>
+  {% for b in books %}
+  <li>
+    <a href="{{ url_for('book', book_id=b.id) }}"><h3>{{ b.name }}</h3></a>
 
-        {% if b.pages_count %}
-        <p>Pages count {{ b.pages_count }}</p>
-        {% endif %}
+    {% if b.author_name %}
+    <p>by {{ b.author_name }}</p>
+    {% endif %}
 
-        {% if b.price %}
-        <p>Price ${{ b.price }}</p>
-        {% endif %}
-
-        <b>Added by <a href="{{ url_for('user', user_id=b.user_id) }}">{{ b.user.name }}</a></b>
-        <br>
-        <h3><a href="{{ url_for('editBook', book_id=b.id) }}">Edit</a></h3>
-        <br><br>
-      </li>
-      <br>
-      {% endfor %}
-    </ul>
-  </body>
-</html>
+    {% if b.cover_image_url %}
+    <a href="{{ url_for('book', book_id=b.id) }}">
+      <img src="{{ b.cover_image_url }}" alt="{{ b.name }}">
+    </a>
+    <br>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}

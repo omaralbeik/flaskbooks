@@ -1,39 +1,43 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>{{ book.name }}</title>
-  </head>
-  <body>
-    <h1>{{ book.name }}</h1>
+{% extends "base.html" %}
 
-    {% if book.cover_image_url %}
-    <img src="{{ book.cover_image_url }}" alt="{{ book.name }}">
-    {% endif %}
+{% block title %}
+{{ book.name }}
+{% endblock %}
 
-    {% if book.author_name %}
-    <p>by {{ book.author_name }} {% if book.year %}{{ book.year }}{% endif %}</p>
-    {% endif %}
+{% block head %}
+{{ super() }}
+{% endblock %}
 
-    {% if book.description %}
-    <p>{{ book.description }}</p>
-    {% endif %}
+{% block content %}
+<h1>{{ book.name }}</h1>
+<h3><a href="{{ url_for('editBook', book_id=book.id) }}">Edit Book</a></h3>
 
-    {% if book.pages_count %}
-    <p>Pages count {{ book.pages_count }}</p>
-    {% endif %}
+{% if book.cover_image_url %}
+<img src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+{% endif %}
 
-    {% if book.price %}
-    <p>Price ${{ book.price }}</p>
-    {% endif %}
+{% if book.author_name %}
+<p>by {{ book.author_name }} {% if book.year %}{{ book.year }}{% endif %}</p>
+{% endif %}
 
-    <b>Genre
-      <a href="{{ url_for('genre', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
-    </b>
-    <br>
-    <b>Added by
-      <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name }}</a>
-    </b>
+{% if book.description %}
+<p>{{ book.description }}</p>
+{% endif %}
 
-  </body>
-</html>
+{% if book.pages_count %}
+<p>Pages count {{ book.pages_count }}</p>
+{% endif %}
+
+{% if book.price %}
+<p>Price ${{ book.price }}</p>
+{% endif %}
+
+<b>Genre
+  <a href="{{ url_for('genre', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
+</b>
+<br>
+<b>Added by
+  <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name }}</a>
+</b>
+
+{% endblock %}
