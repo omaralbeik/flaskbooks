@@ -15,11 +15,52 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+########################################
+###          HTML Endpoints          ###
+########################################
+
+# show all books
+@app.route('/')
+@app.route('/books/')
+def books():
+    books = session.query(Book).all()
+    return render_template('books.html', books=books)
+
+# show book info
+@app.route('/book/<int:book_id>')
+def book(book_id):
+    book = session.query(Book).filter_by(id=book_id).one()
+    return render_template('book.html', book=book)
+
+# show genre
+@app.route('/genre/<int:genre_id>/')
+def genre(genre_id):
+    genre = session.query(Genre).filter_by(id=genre_id).one()
+    books = session.query(Book).filter_by(genre_id=genre_id)
+    return render_template('genre.html', genre=genre, books=books)
+
+
+# show user
+@app.route('/user/<int:user_id>/')
+def user(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    genres = session.query(Genre).filter_by(user_id=user_id).all()
+    books = session.query(Book).filter_by(user_id=user_id).all()
+    return render_template('user.html', user=user, genres=genres, books=books)
+
+
+
+
+########################################
+###         JSON Endpoints           ###
+########################################
+
 # List all Users
 @app.route('/users/JSON')
 def usersJSON():
     users = session.query(User).all()
     return jsonify(Users=[u.serialize for u in users])
+
 
 # List user info
 @app.route('/user/<int:user_id>/JSON')
@@ -35,11 +76,13 @@ def userJSON(user_id):
                    genres=[c.id for c in genres],
                    books=[b.id for b in books])
 
+
 # List all Genres
 @app.route('/genres/JSON')
 def genresJSON():
     genres = session.query(Genre).all()
     return jsonify(genres=[c.serialize for c in genres])
+
 
 # List Genres books
 @app.route('/genre/<int:genre_id>/JSON')

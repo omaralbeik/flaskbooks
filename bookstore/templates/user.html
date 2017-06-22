@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ user.name }}</title>
+  </head>
+  <body>
+    <h1>{{ user.name }}</h1>
+    {% if user.email %}
+    <a href="mailto:{{user.email}}">{{ user.email }}</a>
+    {% endif %}
+    <ul>
+      <h3>Genres</h3>
+      {% for g in genres %}
+      <li>
+        <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+    <ul>
+      <h3>Books</h3>
+      {% for b in books %}
+      <li>
+        <a href="{{ url_for('book', book_id=b.id) }}">{{ b.name }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

@@ -68,7 +68,8 @@ class Book(Base):
         # Returns book data in easily serializeable format
         dict = {
         'id': self.id,
-        'name': self.name
+        'name': self.name,
+        'genre_id': self.genre_id
         }
         if self.description:
             dict['description'] = self.description

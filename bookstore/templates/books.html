@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Bookstore</title>
+  </head>
+  <body>
+    <h1>Books</h1>
+    <ul>
+      {% for b in books %}
+      <li>
+        <h3>{{ b.name }}</h3>
+        <p>by {{ b.author_name }}, {{ b.year }}</p>
+        <a href="{{ url_for('genre', genre_id=b.genre_id) }}">{{ b.genre.name }}</a>
+        <p>{{ b.description }}</p>
+        <p>Price ${{ b.price }}</p>
+        <b>Added by <a href="{{ url_for('user', user_id=b.user_id) }}">{{ b.user.name }}</a></b>
+        <br>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
