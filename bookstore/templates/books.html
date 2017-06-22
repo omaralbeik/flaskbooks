@@ -6,17 +6,43 @@
   </head>
   <body>
     <h1>Books</h1>
+    <h3><a href="{{ url_for('newBook') }}">Add New Book</a></h3>
     <ul>
       {% for b in books %}
       <li>
         <h3>{{ b.name }}</h3>
-        <p>by {{ b.author_name }}, {{ b.year }}</p>
+        {% if b.author_name %}
+        {% endif %}
+
+        {% if b.cover_image_url %}
+        <img src="{{ b.cover_image_url }}" alt="{{ b.name }}">
+        <br>
+        {% endif %}
+
+        {% if b.author_name %}
+        <p>by {{ b.author_name }} {% if b.year %}{{ b.year }}{% endif %}</p>
+        {% endif %}
+
         <a href="{{ url_for('genre', genre_id=b.genre_id) }}">{{ b.genre.name }}</a>
+
+        {% if b.description %}
         <p>{{ b.description }}</p>
+        {% endif %}
+
+        {% if b.pages_count %}
+        <p>Pages count {{ b.pages_count }}</p>
+        {% endif %}
+
+        {% if b.price %}
         <p>Price ${{ b.price }}</p>
+        {% endif %}
+
         <b>Added by <a href="{{ url_for('user', user_id=b.user_id) }}">{{ b.user.name }}</a></b>
         <br>
+        <h3><a href="{{ url_for('editBook', book_id=b.id) }}">Edit</a></h3>
+        <br><br>
       </li>
+      <br>
       {% endfor %}
     </ul>
   </body>

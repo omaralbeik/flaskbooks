@@ -7,6 +7,10 @@
   <body>
     <h1>{{ book.name }}</h1>
 
+    {% if book.cover_image_url %}
+    <img src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+    {% endif %}
+
     {% if book.author_name %}
     <p>by {{ book.author_name }} {% if book.year %}{{ book.year }}{% endif %}</p>
     {% endif %}
