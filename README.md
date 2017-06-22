@@ -1,1 +1,1 @@
-# py-bookstore
+# flask-bookstore
