@@ -230,7 +230,11 @@ def render_delete_book(book_id):
 
 def render_genres():
     genres = session.query(Genre).all()
-    return render_template('genres.html', genres=genres)
+    books = session.query(Book).all()
+    counts = dict()
+    for b in books:
+        counts[b.genre_id] = counts.get(b.genre_id, 0) + 1
+    return render_template('genres.html', genres=genres, books_count=counts)
 
 def render_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
@@ -290,26 +294,20 @@ def redicrect_user(user_id):
 ###         JSON Endpoints           ###
 ########################################
 
-# List all Users
-@app.route('/users/JSON')
-def usersJSON():
-    users = session.query(User).all()
-    return jsonify(Users=[u.serialize for u in users])
+# List all Books
+@app.route('/books/JSON')
+def booksJSON():
+    books = session.query(Book).all()
+    return jsonify(books=[b.serialize for b in books])
 
-
-# List user info
-@app.route('/user/<int:user_id>/JSON')
-def userJSON(user_id):
-    error = validateUser(user_id)
+# List Book info
+@app.route('/book/<int:book_id>/JSON')
+def bookJSON(book_id):
+    error = validateBook(book_id)
     if error:
         return jsonify(error=error)
-
-    user = session.query(User).filter_by(id=user_id).one()
-    genres = session.query(Genre).filter_by(user_id=user_id).all()
-    books = session.query(Book).filter_by(user_id=user_id).all()
-    return jsonify(user_info=user.serialize,
-                   genres=[c.id for c in genres],
-                   books=[b.id for b in books])
+    book = session.query(Book).filter_by(id=book_id).one()
+    return jsonify(book=book.serialize)
 
 
 # List all Genres
@@ -330,21 +328,26 @@ def genreBooksJSON(genre_id):
     return jsonify(name=genre.name, books_count=len(books), books=[b.id for b in books])
 
 
-# List all Books
-@app.route('/books/JSON')
-def booksJSON():
-    books = session.query(Book).all()
-    return jsonify(books=[b.serialize for b in books])
+# List all Users
+@app.route('/users/JSON')
+def usersJSON():
+    users = session.query(User).all()
+    return jsonify(Users=[u.serialize for u in users])
 
 
-# List Book info
-@app.route('/book/<int:book_id>/JSON')
-def bookJSON(book_id):
-    error = validateBook(book_id)
+# List user info
+@app.route('/user/<int:user_id>/JSON')
+def userJSON(user_id):
+    error = validateUser(user_id)
     if error:
         return jsonify(error=error)
-    book = session.query(Book).filter_by(id=book_id).one()
-    return jsonify(book=book.serialize)
+
+    user = session.query(User).filter_by(id=user_id).one()
+    genres = session.query(Genre).filter_by(user_id=user_id).all()
+    books = session.query(Book).filter_by(user_id=user_id).all()
+    return jsonify(user_info=user.serialize,
+                   genres=[c.id for c in genres],
+                   books=[b.id for b in books])
 
 
 
