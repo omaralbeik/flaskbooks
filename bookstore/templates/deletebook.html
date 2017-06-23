@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}
+Edit {{ book.name }}
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<div class="book-info">
+  <div class="row">
+    <div class="col-md-4 col-sm-8">
+      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+    </div>
+    <div class="col-md-8 col-sm-12">
+      <form action="{{ url_for('deleteBook', book_id=book.id) }}" method="post">
+        <h1>Delete {{ book.name }}?</h1>
+        <input type="submit" class="btn btn-danger" value="Delete">
+        <a href="{{ url_for('book', book_id=book.id) }}" class="btn btn-secondary">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

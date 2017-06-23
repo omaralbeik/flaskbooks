@@ -9,35 +9,55 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ book.name }}</h1>
-<h3><a href="{{ url_for('editBook', book_id=book.id) }}">Edit Book</a></h3>
 
-{% if book.cover_image_url %}
-<img src="{{ book.cover_image_url }}" alt="{{ book.name }}">
-{% endif %}
+<div class="book-info">
+  <div class="row">
+    <div class="col-md-4 col-sm-8">
+      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+    </div>
+    <div class="col-md-8 col-sm-12">
+      <h1>{{ book.name }}</h1>
 
-{% if book.author_name %}
-<p>by {{ book.author_name }} {% if book.year %}{{ book.year }}{% endif %}</p>
-{% endif %}
+      {% if book.author_name %}
+      <p>by {{ book.author_name }}</p>
+      {% endif %}
 
-{% if book.description %}
-<p>{{ book.description }}</p>
-{% endif %}
+      {% if book.description %}
+      <p>{{ book.description }}</p>
+      {% endif %}
 
-{% if book.pages_count %}
-<p>Pages count {{ book.pages_count }}</p>
-{% endif %}
+      <br>
 
-{% if book.price %}
-<p>Price ${{ book.price }}</p>
-{% endif %}
+      {% if book.genre_id %}
+      <p>Genre
+        <a href="{{ url_for('genre', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
+      </p>
+      {% endif %}
 
-<b>Genre
-  <a href="{{ url_for('genre', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
-</b>
-<br>
-<b>Added by
-  <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name }}</a>
-</b>
+      {% if book.year %}
+      <p>Release Date {{ book.year }}</p>
+      {% endif %}
+
+      {% if book.pages_count %}
+      <p>Pages count {{ book.pages_count }}</p>
+      {% endif %}
+
+      {% if book.price %}
+      <p>Price ${{ book.price }}</p>
+      {% endif %}
+
+      <p>Added by
+        <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name }}</a>
+      </p>
+
+      <br>
+
+      <a href="{{ url_for('editBook', book_id=book.id) }}" class="btn btn-primary">Edit Book</a>
+      <a href="{{ url_for('deleteBook', book_id=book.id) }}" class="btn btn-danger">Delete Book</a>
+
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}

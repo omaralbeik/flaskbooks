@@ -19,26 +19,16 @@ session = DBSession()
 ###          HTML Endpoints          ###
 ########################################
 
-# show all books
+# Show all books
 @app.route('/')
 @app.route('/books/')
 def books():
     return render_books()
 
-# show book info
+# Show book info
 @app.route('/book/<int:book_id>')
 def book(book_id):
     return render_book(book_id)
-
-# show genre
-@app.route('/genre/<int:genre_id>/')
-def genre(genre_id):
-    return render_genre(genre_id)
-
-# show user
-@app.route('/user/<int:user_id>/')
-def user(user_id):
-    return render_user(user_id)
 
 # Add a new book
 @app.route('/books/new/', methods=['GET', 'POST'])
@@ -57,11 +47,11 @@ def newBook():
         price = request.form['price']
 
         if not name:
-            flash("Please enter book name")
+            flash("Please enter book name", "danger")
             return render_new_book()
 
         if not genre_id:
-            flash("Please select a genre")
+            flash("Please select a genre", "danger")
             return render_new_book()
 
         book = Book(name=name, genre_id=genre_id, user_id=1)
@@ -77,7 +67,6 @@ def newBook():
         session.commit()
 
         return redicrect_books()
-
 
 # Edit book
 @app.route('/book/<int:book_id>/edit/', methods=['GET', 'POST'])
@@ -96,15 +85,16 @@ def editBook(book_id):
         price = request.form['price']
 
         if not name:
-            flash("Please enter book name")
+            flash("Please enter book name", "danger")
             return render_new_book()
 
         if not genre_id:
-            flash("Please select a genre")
+            flash("Please select a genre", "danger")
             return render_new_book()
 
         book = session.query(Book).filter_by(id=book_id).one()
 
+        book.genre_id = genre_id
         book.description = description if description else None
         book.cover_image_url = cover_image_url if cover_image_url else None
         book.pages_count = pages_count if pages_count else None
@@ -116,6 +106,98 @@ def editBook(book_id):
         session.commit()
 
         return redicrect_books()
+
+# Delete book
+@app.route('/book/<int:book_id>/delete/', methods=['GET', 'POST'])
+def deleteBook(book_id):
+    if request.method == 'GET':
+        return render_delete_book(book_id)
+
+    if request.method == 'POST':
+        book = session.query(Book).filter_by(id=book_id).one()
+        session.delete(book)
+        session.commit()
+        flash("Book deleted!", "success")
+        return redicrect_books()
+
+
+
+# Show all genres
+@app.route('/genres/')
+def genres():
+    return render_genres()
+
+# Show genre
+@app.route('/genre/<int:genre_id>/')
+def genre(genre_id):
+    return render_genre(genre_id)
+
+# Show new genre
+@app.route('/genres/new/', methods=['GET', 'POST'])
+def newGenre():
+    if request.method == 'GET':
+        return render_new_genre()
+
+    if request.method == 'POST':
+        name = request.form['name']
+
+        if not name:
+            flash("Please enter book name", "danger")
+            return render_new_genre()
+
+        genre = Genre(name=name, user_id=1)
+        session.add(genre)
+        session.commit()
+        flash("Genre created!", "success")
+        return redicrect_genres()
+
+# Show edit genre
+@app.route('/genre/<int:genre_id>/edit/', methods=['GET', 'POST'])
+def editGenre(genre_id):
+    if request.method == 'GET':
+        return render_edit_genre(genre_id)
+
+    if request.method == 'POST':
+        name = request.form['name']
+
+        if not name:
+            flash("Please enter book name", "danger")
+            return render_new_genre()
+
+        genre = session.query(Genre).filter_by(id=genre_id).one()
+        genre.name = name
+        session.commit()
+        flash("Genre updated!", "success")
+        return redicrect_genres()
+
+# Delete genre
+@app.route('/genre/<int:genre_id>/delete/', methods=['GET', 'POST'])
+def deleteGenre(genre_id):
+    if request.method == 'GET':
+        return render_delete_genre(genre_id)
+
+    if request.method == 'POST':
+        genre = session.query(Genre).filter_by(id=genre_id).one()
+        session.delete(genre)
+        session.commit()
+        flash("Genre deleted!", "success")
+        return redicrect_genres()
+
+
+
+# show all users
+@app.route('/users/')
+def users():
+    return render_users()
+
+# show user
+@app.route('/user/<int:user_id>/')
+def user(user_id):
+    return render_user(user_id)
+
+
+
+
 
 
 
@@ -140,10 +222,37 @@ def render_edit_book(book_id):
     genres = session.query(Genre).all()
     return render_template('editbook.html', book=book, genres=genres)
 
+def render_delete_book(book_id):
+    book = session.query(Book).filter_by(id=book_id).one()
+    return render_template('deletebook.html', book=book)
+
+
+
+def render_genres():
+    genres = session.query(Genre).all()
+    return render_template('genres.html', genres=genres)
+
 def render_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     books = session.query(Book).filter_by(genre_id=genre_id)
     return render_template('genre.html', genre=genre, books=books)
+
+def render_new_genre():
+    return render_template('newgenre.html')
+
+def render_edit_genre(genre_id):
+    genre = session.query(Genre).filter_by(id=genre_id).one()
+    return render_template('editgenre.html', genre=genre)
+
+def render_delete_genre(genre_id):
+    genre = session.query(Genre).filter_by(id=genre_id).one()
+    return render_template('deletegenre.html', genre=genre)
+
+
+
+def render_users():
+    users = session.query(User).all()
+    return render_template('users.html', users=users)
 
 def render_user(user_id):
     user = session.query(User).filter_by(id=user_id).one()
@@ -166,6 +275,9 @@ def redicrect_new_book():
 
 def redicrect_edit_book(book_id):
     return redirect('editbook/%s', book_id)
+
+def redicrect_genres():
+    return redirect('genres/')
 
 def redicrect_genre(genre_id):
     return redirect('genre/%s', genre_id)

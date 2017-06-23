@@ -18,6 +18,15 @@
       <a class="navbar-brand" href="/">Flask Book store</a>
       <ul class="navbar-nav">
       <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('books') }}">Books</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('genres') }}">Genres</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('users') }}">Users</a>
+      </li>
+      <li class="nav-item">
         <a class="nav-link" href="#">Login</a>
       </li>
     </ul>
@@ -26,17 +35,22 @@
 
   <div class="container">
     <div class="flash">
-      {% with messages = get_flashed_messages() %} {% if messages %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
       <ul class="list-unstyled">
-        {% for message in messages %}
+        {% for category, message in messages %}
         <li>
-          <div class="alert alert-danger" role="alert">{{ message }}</div>
+          <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            {{ message }}
+          </div>
         </li>
         {% endfor %}
       </ul>
       {% endif %} {% endwith %}
     </div>
-    <div id="content">
+    <div class="container" id="content">
       {% block content %}
       {% endblock %}
     </div>
@@ -46,10 +60,18 @@
   <footer class="footer">
     <div class="container">
       {% block footer %}
-      <span class="text-muted">Place sticky footer content here.</span>
+      <span class="text-muted">Footer content goes here.</span>
       {% endblock %}
     </div>
   </footer>
+
+  <script
+    src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
+    crossorigin="anonymous"></script>
+  <script type="text/javascript", src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}">
+
+  </script>
 
 </body>
 

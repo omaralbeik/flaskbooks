@@ -9,15 +9,19 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ genre.name }}</h1>
-<p>Added by <a href="{{ url_for('user', user_id=genre.user_id) }}">{{ genre.user.name }}</a></p>
-<br>
-<h3>Books</h3>
-<ul>
+<div class="row subtitle">
+  <div class="col-10">
+    <h1>{{ genre.name }}</h1>
+    <a href="{{ url_for('editGenre', genre_id=genre.id) }}">Edit</a>
+    <br>
+    <a href="{{ url_for('deleteGenre', genre_id=genre.id) }}">Delete</a>
+  </div>
+</div>
+<ul class="list-unstyled">
   {% for b in books %}
-  <li>
-    <a href="{{ url_for('book', book_id=b.id) }}">{{ b.name }}</a>
-  </li>
+  <a href="{{ url_for('book', book_id=b.id) }}">
+    <img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}">
+  </a>
   {% endfor %}
 </ul>
 {% endblock %}

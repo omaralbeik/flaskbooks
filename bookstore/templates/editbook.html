@@ -9,30 +9,59 @@ Edit {{ book.name }}
 {% endblock %}
 
 {% block content %}
-<h1>Edit {{ book.name }}</h1>
 
-<form action="{{ url_for('editBook', book_id=book.id) }}" method="post">
-  <input type="text" name="name" placeholder="Name" value="{{ book.name }}" >
-  <br>
-  <textarea name="description" rows="8" cols="80">{{ book.description }}</textarea>
-  <br>
-  <select name="genre_id">
-      {% for g in genres %}
-      <option value="{{ g.id }}">{{ g.name }}</option>
-      {% endfor %}
-    </select>
-  <br>
-  <input type="text" name="cover_image_url" placeholder="Cover image URL" value="{{ book.cover_image_url }}">
-  <br>
-  <input type="number" min="1" name="pages_count" placeholder="Pages count" value="{{ book.pages_count }}">
-  <br>
-  <input type="text" name="author_name" placeholder="Author name" value="{{ book.author_name }}">
-  <br>
-  <input type="number" min="1" name="year" placeholder="Year" value="{{ book.year }}">
-  <br>
-  <input type="number" min="0" , step="0.01" name="price" placeholder="Price" value="{{ book.price }}">
-  <br>
-  <input type="submit" value="Save">
-</form>
+<div class="book-info">
+  <div class="row">
+    <div class="col-md-4 col-sm-8">
+      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+    </div>
+    <div class="col-md-8 col-sm-12">
+      <form action="{{ url_for('editBook', book_id=book.id) }}" method="post">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" class="form-control" name="name" id="name" placeholder="My Awesome Book!" value="{{ book.name }}">
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea class="form-control" name="description" id="description" rows="3">{{ book.description }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="genre_id">Genre</label>
+            <select class="form-control" name="genre_id" id="genre_id">
+              {% for g in genres %}
+              {% if g.id == book.genre_id %}
+              <option selected value="{{ g.id }}">{{ g.name }}</option>
+              {% else %}
+              <option value="{{ g.id }}">{{ g.name }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cover_image_url">Cover image URL</label>
+            <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="somewebsite.com/myawesombook.jpg" value="{{ book.cover_image_url }}">
+          </div>
+          <div class="form-group">
+            <label for="pages_count">Pages count</label>
+            <input type="number" min="1" class="form-control" name="pages_count" id="pages_count" placeholder="100" value="{{ book.pages_count }}">
+          </div>
+          <div class="form-group">
+            <label for="pages_count">Author Name</label>
+            <input type="text" class="form-control" name="author_name" id="author_name" placeholder="John Applesead" value="{{ book.author_name }}">
+          </div>
+          <div class="form-group">
+            <label for="year">Year</label>
+            <input type="number" min="1" class="form-control" name="year" id="year" placeholder="2017" value="{{ book.year }}">
+          </div>
+          <div class="form-group">
+            <label for="price">Price</label>
+            <input type="number" min="0" step="0.01" class="form-control" name="price" id="price" placeholder="15" value="{{ book.price }}">
+          </div>
+          <input type="submit" class="btn btn-primary" value="Save">
+          <a href="{{ url_for('book', book_id=book.id) }}" class="btn btn-secondary">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

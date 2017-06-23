@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+New Genre
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row subtitle">
+  <div class="col-10">
+    <h1>New Genre</h1>
+  </div>
+</div>
+
+<form action="{{ url_for('newGenre') }}" method="post">
+  <div class="form-group">
+    <label for="name">Genre Name</label>
+    <input type="text" class="form-control" name="name" id="name" placeholder="An Awesome Genre!">
+  </div>
+    <input type="submit" class="btn btn-primary" value="Create">
+    <a href="{{ url_for('genres') }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

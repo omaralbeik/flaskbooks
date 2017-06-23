@@ -1,25 +1,26 @@
 {% extends "base.html" %}
 
 {% block title %}
-Books
+Users
 {% endblock %}
 
 {% block head %}
 {{ super() }}
 {% endblock %}
 
+
 {% block content %}
 <div class="row subtitle">
   <div class="col-10">
-    <h1>Books</h1>
-    <a href="{{ url_for('newBook') }}">Add New</a>
+    <h1>Users</h1>
   </div>
 </div>
+
 <ul class="list-unstyled">
-  {% for b in books %}
-  <a href="{{ url_for('book', book_id=b.id) }}">
-    <img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}">
-  </a>
+  {% for u in users %}
+  <li>
+    <a href="{{ url_for('user', user_id=u.id) }}">{{ u.name }}</a>
+  </li>
   {% endfor %}
 </ul>
 {% endblock %}

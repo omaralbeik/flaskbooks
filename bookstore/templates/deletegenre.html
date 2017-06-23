@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}
+Delete {{ genre.name }}
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row subtitle">
+  <div class="col-10">
+    <h1>Delete {{ genre.name }}?</h1>
+  </div>
+</div>
+
+<form action="{{ url_for('deleteGenre', genre_id=genre.id) }}" method="post">
+  <input type="submit" class="btn btn-danger" value="Delete">
+  <a href="{{ url_for('genre', genre_id=genre.id) }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}
