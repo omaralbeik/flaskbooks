@@ -99,7 +99,7 @@ class Book(Base):
         return dict
 
 
-engine = create_engine('sqlite:///bookstore.db')
+engine = create_engine('sqlite:///flask_books.db')
 Base.metadata.create_all(engine)
 
 print("Database created!")

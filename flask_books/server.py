@@ -9,7 +9,7 @@ from helpers import *
 app = Flask(__name__)
 
 # Connect to the database and create a database session
-engine = create_engine('sqlite:///bookstore.db')
+engine = create_engine('sqlite:///flask_books.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
@@ -253,24 +253,24 @@ def signUp():
 
 def render_books():
     books = session.query(Book).all()
-    return render_template('books.html', books=books)
+    return render_template('books.html', books=books, selected='books')
 
 def render_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
-    return render_template('book.html', book=book)
+    return render_template('book.html', book=book, selected='books')
 
 def render_new_book():
     genres = session.query(Genre).all()
-    return render_template('newbook.html', genres=genres)
+    return render_template('newbook.html', genres=genres, selected='books')
 
 def render_edit_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
     genres = session.query(Genre).all()
-    return render_template('editbook.html', book=book, genres=genres)
+    return render_template('editbook.html', book=book, genres=genres, selected='books')
 
 def render_delete_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
-    return render_template('deletebook.html', book=book)
+    return render_template('deletebook.html', book=book, selected='books')
 
 
 
@@ -280,15 +280,15 @@ def render_genres():
     counts = dict()
     for b in books:
         counts[b.genre_id] = counts.get(b.genre_id, 0) + 1
-    return render_template('genres.html', genres=genres, books_count=counts)
+    return render_template('genres.html', genres=genres, books_count=counts, selected='genres')
 
 def render_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     books = session.query(Book).filter_by(genre_id=genre_id)
-    return render_template('genre.html', genre=genre, books=books)
+    return render_template('genre.html', genre=genre, books=books, selected='genres')
 
 def render_new_genre():
-    return render_template('newgenre.html')
+    return render_template('newgenre.html', selected='genres')
 
 def render_edit_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
@@ -296,22 +296,22 @@ def render_edit_genre(genre_id):
 
 def render_delete_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('deletegenre.html', genre=genre)
+    return render_template('deletegenre.html', genre=genre, selected='genres')
 
 
 
 def render_users():
     users = session.query(User).all()
-    return render_template('users.html', users=users)
+    return render_template('users.html', users=users, selected='users')
 
 def render_user(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     genres = session.query(Genre).filter_by(user_id=user_id).all()
     books = session.query(Book).filter_by(user_id=user_id).all()
-    return render_template('user.html', user=user, genres=genres, books=books)
+    return render_template('user.html', user=user, genres=genres, books=books, selected='users')
 
 def render_auth():
-    return render_template('auth.html')
+    return render_template('auth.html', selected='auth')
 
 ########################################
 ###       Redicrect Functions        ###
@@ -402,4 +402,4 @@ def userJSON(user_id):
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000)

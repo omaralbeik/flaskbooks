@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 
 from database_setup import Base, User, Genre, Book
 
-engine = create_engine('sqlite:///bookstore.db')
+engine = create_engine('sqlite:///flask_books.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
