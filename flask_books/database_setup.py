@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime
+from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -12,9 +12,9 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
+    email = Column(String(250), nullable=False)
     first_name = Column(String(250), nullable=True)
     last_name = Column(String(250), nullable=True)
-    email = Column(String(250), nullable=False)
     photo_url = Column(String(750), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -23,9 +23,14 @@ class User(Base):
         # Returns user data in easily serializeable format
         dict = {
             'id': self.id,
-            'name': self.name,
-            'email': self.email
+            'email': self.email,
+            'created_at': self.created_at
+
         }
+        if self.first_name:
+            dict["first_name"] = self.first_name
+        if self.last_name:
+            dict["last_name"] = self.last_name
         if self.photo_url:
             dict["photo_url"] = self.photo_url
         return dict
@@ -40,7 +45,7 @@ class Genre(Base):
     __tablename__ = 'genre'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    name = Column(String(250), nullable=False, unique=True)
 
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
@@ -52,7 +57,8 @@ class Genre(Base):
         # Returns genre data in easily serializeable format
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'created_at': self.created_at
         }
 
 
@@ -82,7 +88,8 @@ class Book(Base):
         dict = {
         'id': self.id,
         'name': self.name,
-        'genre_id': self.genre_id
+        'genre_id': self.genre_id,
+        'created_at': self.created_at
         }
         if self.description:
             dict['description'] = self.description

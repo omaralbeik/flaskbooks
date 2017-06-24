@@ -5,7 +5,7 @@ from database_setup import Base, User, Genre, Book
 from api_errors import APIError
 
 # Connect to the database and create a database session
-engine = create_engine('sqlite:///bookstore.db')
+engine = create_engine('sqlite:///flask_books.db')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()

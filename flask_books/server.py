@@ -142,7 +142,11 @@ def newGenre():
         name = request.form['name']
 
         if not name:
-            flash("Please enter book name", "danger")
+            flash("Please enter genre name", "danger")
+            return render_new_genre()
+
+        if session.query(Genre).filter_by(name=name).one():
+            flash("Genre already exist!", "danger")
             return render_new_genre()
 
         genre = Genre(name=name, user_id=1)
@@ -402,4 +406,4 @@ def userJSON(user_id):
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000)
