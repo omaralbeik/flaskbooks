@@ -1,4 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text
+import datetime
+
+from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -10,9 +12,11 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+    first_name = Column(String(250), nullable=True)
+    last_name = Column(String(250), nullable=True)
     email = Column(String(250), nullable=False)
     photo_url = Column(String(750), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     @property
     def serialize(self):
@@ -26,6 +30,11 @@ class User(Base):
             dict["photo_url"] = self.photo_url
         return dict
 
+    def name(self):
+        if self.first_name and self.last_name:
+            return self.first_name + " " + self.last_name
+        else:
+            return self.email
 
 class Genre(Base):
     __tablename__ = 'genre'
@@ -35,6 +44,8 @@ class Genre(Base):
 
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     @property
     def serialize(self):
@@ -62,6 +73,8 @@ class Book(Base):
 
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     @property
     def serialize(self):

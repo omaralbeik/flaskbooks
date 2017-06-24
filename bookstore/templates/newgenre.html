@@ -18,8 +18,8 @@ New Genre
 
 <form action="{{ url_for('newGenre') }}" method="post">
   <div class="form-group">
-    <label for="name">Genre Name</label>
-    <input type="text" class="form-control" name="name" id="name" placeholder="An Awesome Genre!">
+    <label for="name">Name*</label>
+    <input type="text" class="form-control" name="name" id="name" placeholder="Genre Name">
   </div>
     <input type="submit" class="btn btn-primary" value="Create">
     <a href="{{ url_for('genres') }}" class="btn btn-secondary">Cancel</a>

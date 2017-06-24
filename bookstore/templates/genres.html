@@ -18,7 +18,7 @@ Genres
 <ul class="list-unstyled">
   {% for g in genres %}
   <li>
-    <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }} ({{ books_count[g.id] }})</a>
+    <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }} ({{ books_count[g.id] or 0 }})</a>
   </li>
   {% endfor %}
 </ul>

@@ -196,9 +196,55 @@ def user(user_id):
     return render_user(user_id)
 
 
+# show auth
+@app.route('/auth/')
+def auth():
+    return render_auth()
 
 
+@app.route('/auth/signin', methods=['POST'])
+def signIn():
+    email = request.form['email']
+    password = request.form['password']
 
+    if not email:
+        flash("Please enter your email!", "danger")
+        return render_auth()
+
+    if not password:
+        flash("Please enter your password!", "danger")
+        return render_auth()
+
+    flash("Signed In!", "success")
+    return redicrect_books()
+
+@app.route('/auth/signup', methods=['POST'])
+def signUp():
+
+    firstName = request.form['first_name']
+    lastName = request.form['last_name']
+    email = request.form['email']
+    password = request.form['password']
+    password2 = request.form['password2']
+
+    if not email:
+        flash("Please enter your email!", "danger")
+        return render_auth()
+
+    if not password:
+        flash("Please enter your password!", "danger")
+        return render_auth()
+
+    if not password2:
+        flash("Passwords don't match", "danger")
+        return render_auth()
+
+    if password != password2:
+        flash("Passwords don't match", "danger")
+        return render_auth()
+
+    flash("Signed Up!", "success")
+    return redicrect_books()
 
 
 ########################################
@@ -264,6 +310,8 @@ def render_user(user_id):
     books = session.query(Book).filter_by(user_id=user_id).all()
     return render_template('user.html', user=user, genres=genres, books=books)
 
+def render_auth():
+    return render_template('auth.html')
 
 ########################################
 ###       Redicrect Functions        ###

@@ -13,17 +13,25 @@ session.query(Genre).delete()
 session.query(Book).delete()
 session.commit()
 
-user1 = User(name="Omar Albeik", email="omaralbeik@gmail.com")
-user2 = User(name="Mert Akengin", email="mert.akengin@gmail.com")
-user3 = User(name="John Applesead", email="john.applesead@apple.com")
+user1 = User(first_name="Omar", last_name="Albeik", email="omaralbeik@gmail.com")
+user2 = User(first_name="Jane", last_name="Doe", email="jane.doe@gmail.com")
+user3 = User(first_name="John", last_name="Applesead", email="john.applesead@apple.com")
 users = [user1, user2, user3]
 for u in users:
     session.add(u)
 session.commit()
 
 genre1 = Genre(name="Non Fiction", user_id=1)
-genre2 = Genre(name="Fiction", user_id=2)
-genres = [genre1, genre2]
+genre2 = Genre(name="Fiction", user_id=1)
+genre3 = Genre(name="Mystery", user_id=1)
+genre4 = Genre(name="Horror", user_id=1)
+genre5 = Genre(name="Poetry", user_id=2)
+genre6 = Genre(name="Diaries", user_id=2)
+genre7 = Genre(name="Series", user_id=3)
+genre8 = Genre(name="Biographies", user_id=3)
+
+
+genres = [genre1, genre2, genre3, genre4, genre5, genre6, genre7, genre8]
 for g in genres:
     session.add(g)
 session.commit()
@@ -36,7 +44,11 @@ book3 = Book(name="Ender's Game", description="Ender's Game is a 1985 military s
 
 book4 = Book(name="Bossypants", description="Before Liz Lemon, before \"Weekend Update,\" before \"Sarah Palin,\" Tina Fey was just a young girl with a dream: a recurring stress dream that she was being chased through a local airport by her middle-school gym teacher. She also had a dream that one day she would be a comedian on TV.", pages_count = 283, author_name="Tina Fey", year=2011, genre_id=1, user_id=3, cover_image_url="https://images.gr-assets.com/books/1481509554l/9418327.jpg")
 
-books = [book1, book2, book3, book4]
+book5 = Book(name="Elon Musk: Tesla, SpaceX, and the Quest for a Fantastic Future", description="Elon Musk: Tesla, SpaceX, and the Quest for a Fantastic Future is Ashlee Vance's biography of Elon Musk, published in 2015.", pages_count = 400, author_name="Ashlee Vance", year=2015, genre_id=8, user_id=2, cover_image_url="https://images.gr-assets.com/books/1404411386l/22543496.jpg")
+
+book6 = Book(name="And Then There Were None", pages_count = 283, author_name="Agatha Christie", year=1939, genre_id=3, user_id=3, cover_image_url="https://images.gr-assets.com/books/1391120695l/16299.jpg")
+
+books = [book1, book2, book3, book4, book5, book6]
 for b in books:
     session.add(b)
 session.commit()
