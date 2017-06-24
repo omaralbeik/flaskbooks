@@ -48,11 +48,25 @@ def newBook():
 
         if not name:
             flash("Please enter book name", "danger")
-            return render_new_book()
+            return render_new_book(name=name,
+            description=description,
+            genre_id=genre_id,
+            cover_image_url=cover_image_url,
+            pages_count=pages_count,
+            author_name=author_name,
+            year=year,
+            price=price)
 
         if not genre_id:
             flash("Please select a genre", "danger")
-            return render_new_book()
+            return render_new_book(name=name,
+            description=description,
+            genre_id=genre_id,
+            cover_image_url=cover_image_url,
+            pages_count=pages_count,
+            author_name=author_name,
+            year=year,
+            price=price)
 
         book = Book(name=name, genre_id=genre_id, user_id=1)
 
@@ -86,11 +100,11 @@ def editBook(book_id):
 
         if not name:
             flash("Please enter book name", "danger")
-            return render_new_book()
+            return render_edit_book(book_id=book_id)
 
         if not genre_id:
             flash("Please select a genre", "danger")
-            return render_new_book()
+            return render_edit_book(book_id=book_id)
 
         book = session.query(Book).filter_by(id=book_id).one()
 
@@ -263,14 +277,14 @@ def render_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
     return render_template('book.html', book=book, selected='books')
 
-def render_new_book():
+def render_new_book(**kwargs):
     genres = session.query(Genre).all()
-    return render_template('newbook.html', genres=genres, selected='books')
+    return render_template('newbook.html', genres=genres, selected='books', **kwargs)
 
-def render_edit_book(book_id):
+def render_edit_book(book_id, **kwargs):
     book = session.query(Book).filter_by(id=book_id).one()
     genres = session.query(Genre).all()
-    return render_template('editbook.html', book=book, genres=genres, selected='books')
+    return render_template('editbook.html', book=book, genres=genres, selected='books', **kwargs)
 
 def render_delete_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
@@ -291,12 +305,12 @@ def render_genre(genre_id):
     books = session.query(Book).filter_by(genre_id=genre_id)
     return render_template('genre.html', genre=genre, books=books, selected='genres')
 
-def render_new_genre():
-    return render_template('newgenre.html', selected='genres')
+def render_new_genre(**kwargs):
+    return render_template('newgenre.html', selected='genres', **kwargs)
 
-def render_edit_genre(genre_id):
+def render_edit_genre(genre_id, **kwargs):
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('editgenre.html', genre=genre)
+    return render_template('editgenre.html', genre=genre, **kwargs)
 
 def render_delete_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
