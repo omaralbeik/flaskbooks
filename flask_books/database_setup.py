@@ -20,7 +20,6 @@ class User(Base):
 
     books = relationship('Book', backref='owner', lazy=True)
     genres = relationship('Genre', backref='owner', lazy=True)
-
     likes = relationship('Like', backref='owner', lazy=True)
 
     @property
@@ -55,6 +54,7 @@ class Genre(Base):
     user = relationship(User)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    books = relationship('Book', backref='parent_genre', lazy=True)
 
     @property
     def serialize(self):

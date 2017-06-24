@@ -180,7 +180,8 @@ def genres():
 # Show genre
 @app.route('/genre/<int:genre_id>/')
 def genre(genre_id):
-    return render_genre(genre_id)
+    genre = session.query(Genre).filter_by(id=genre_id).one()
+    return render_genre(genre_id, books=genre.books)
 
 # Show new genre
 @app.route('/genres/new/', methods=['GET', 'POST'])
@@ -340,10 +341,10 @@ def render_genres():
         counts[b.genre_id] = counts.get(b.genre_id, 0) + 1
     return render_template('genres.html', genres=genres, books_count=counts, selected='genres')
 
-def render_genre(genre_id):
+def render_genre(genre_id, **kwargs):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     books = session.query(Book).filter_by(genre_id=genre_id)
-    return render_template('genre.html', genre=genre, selected='genres')
+    return render_template('genre.html', genre=genre, selected='genres', **kwargs)
 
 def render_new_genre(**kwargs):
     return render_template('newgenre.html', selected='genres', **kwargs)
@@ -433,13 +434,12 @@ def genresJSON():
 
 # List Genres books
 @app.route('/genre/<int:genre_id>/JSON')
-def genreBooksJSON(genre_id):
+def genreJSON(genre_id):
     error = validateGenre(genre_id)
     if error:
         return jsonify(error=error)
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    books = session.query(Book).filter_by(genre_id=genre_id).all()
-    return jsonify(name=genre.name, books_count=len(books), books=[b.id for b in books])
+    return jsonify(name=genre.name, books_count=len(genre.books), books=[b.id for b in genre.books])
 
 
 # List all Users
