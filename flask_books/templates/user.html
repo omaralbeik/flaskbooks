@@ -42,6 +42,17 @@
 </ul>
 {% endif %}
 
+{% if liked_books|length > 0 %}
+<h2>Liked Books</h2>
+<ul class="list-unstyled">
+  {% for b in liked_books %}
+  <a href="{{ url_for('book', book_id=b.id) }}">
+    <img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}">
+  </a>
+  {% endfor %}
+</ul>
+{% endif %}
+
 
 
 {% endblock %}

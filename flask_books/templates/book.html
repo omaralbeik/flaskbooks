@@ -17,10 +17,20 @@
     </div>
     <div class="col-md-8 col-sm-12">
       <h1>{{ book.name }}</h1>
-
       {% if book.author_name %}
       <p>by {{ book.author_name }}</p>
       {% endif %}
+
+      {% if is_liked %}
+      <form action="{{ url_for('dislikeBook', book_id=book.id) }}" method="post">
+        <input class="btn btn-primary" type="submit" name="" value="Dislike {% if likes_count %}({{ likes_count }}){% endif %}">
+      </form>
+      {% else %}
+      <form action="{{ url_for('likeBook', book_id=book.id) }}" method="post">
+        <input class="btn btn-secondary" type="submit" name="" value="Like {% if likes_count %}({{ likes_count }}){% endif %}">
+      </form>
+      {% endif %}
+
 
       {% if book.description %}
       <p>{{ book.description }}</p>
@@ -49,9 +59,7 @@
       <p>Added by
         <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name() }}</a>
       </p>
-
       <br>
-
       <a href="{{ url_for('editBook', book_id=book.id) }}" class="btn btn-primary">Edit Book</a>
       <a href="{{ url_for('deleteBook', book_id=book.id) }}" class="btn btn-danger">Delete Book</a>
 

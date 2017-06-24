@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -18,6 +18,11 @@ class User(Base):
     photo_url = Column(String(750), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+    books = relationship('Book', backref='owner', lazy=True)
+    genres = relationship('Genre', backref='owner', lazy=True)
+
+    likes = relationship('Like', backref='owner', lazy=True)
+
     @property
     def serialize(self):
         # Returns user data in easily serializeable format
@@ -25,7 +30,6 @@ class User(Base):
             'id': self.id,
             'email': self.email,
             'created_at': self.created_at
-
         }
         if self.first_name:
             dict["first_name"] = self.first_name
@@ -89,7 +93,6 @@ class Book(Base):
         'id': self.id,
         'name': self.name,
         'genre_id': self.genre_id,
-        'created_at': self.created_at
         }
         if self.description:
             dict['description'] = self.description
@@ -104,6 +107,19 @@ class Book(Base):
         if self.price:
             dict['price'] = self.price
         return dict
+
+class Like(Base):
+    __tablename__ = 'like'
+
+    id = Column(Integer, primary_key=True)
+
+    book_id = Column(Integer, ForeignKey('book.id'))
+    book = relationship(Book)
+
+    user_id = Column(Integer, ForeignKey('user.id'))
+    user = relationship(User)
+
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 
 engine = create_engine('sqlite:///flask_books.db')

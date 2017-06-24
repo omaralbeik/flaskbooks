@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, User, Genre, Book
+from database_setup import Base, User, Genre, Book, Like
 from helpers import *
 
 app = Flask(__name__)
@@ -68,7 +68,7 @@ def newBook():
             year=year,
             price=price)
 
-        book = Book(name=name, genre_id=genre_id, user_id=1)
+        book = Book(name=name, genre_id=genre_id, user_id=2)
 
         book.description = description if description else None
         book.cover_image_url = cover_image_url if cover_image_url else None
@@ -134,6 +134,42 @@ def deleteBook(book_id):
         flash("Book deleted!", "success")
         return redicrect_books()
 
+
+# Like a book
+@app.route('/book/<int:book_id>/like/', methods=['GET', 'POST'])
+def likeBook(book_id):
+    if request.method == 'GET':
+        return render_book(book_id)
+
+    if validateBook(book_id) or validateUser(2):
+        return redicrect_book(book_id)
+
+    like = session.query(Like).filter_by(book_id=book_id, user_id=2).all()
+
+    if not like:
+        like = Like(book_id=book_id, user_id=2)
+        session.add(like)
+        session.commit()
+
+    return redicrect_book(book_id)
+
+# Dislike a book
+@app.route('/book/<int:book_id>/dislike/', methods=['GET', 'POST'])
+def dislikeBook(book_id):
+    if request.method == 'GET':
+        return render_book(book_id)
+
+    if request.method == 'POST':
+        if validateBook(book_id) or validateUser(2):
+            return redicrect_book(book_id)
+
+        like = session.query(Like).filter_by(book_id=book_id, user_id=2).one()
+
+        if like:
+            session.delete(like)
+            session.commit()
+
+        return redicrect_book(book_id)
 
 
 # Show all genres
@@ -275,7 +311,11 @@ def render_books():
 
 def render_book(book_id):
     book = session.query(Book).filter_by(id=book_id).one()
-    return render_template('book.html', book=book, selected='books')
+    likes = session.query(Like).filter_by(book_id=book_id).all()
+    user = session.query(User).filter_by(id=2).one()
+    liked_ids = [l.book_id for l in user.likes]
+    is_liked = book_id in liked_ids
+    return render_template('book.html', book=book, selected='books', likes_count=len(likes), is_liked=is_liked)
 
 def render_new_book(**kwargs):
     genres = session.query(Genre).all()
@@ -303,7 +343,7 @@ def render_genres():
 def render_genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     books = session.query(Book).filter_by(genre_id=genre_id)
-    return render_template('genre.html', genre=genre, books=books, selected='genres')
+    return render_template('genre.html', genre=genre, selected='genres')
 
 def render_new_genre(**kwargs):
     return render_template('newgenre.html', selected='genres', **kwargs)
@@ -324,9 +364,11 @@ def render_users():
 
 def render_user(user_id):
     user = session.query(User).filter_by(id=user_id).one()
-    genres = session.query(Genre).filter_by(user_id=user_id).all()
-    books = session.query(Book).filter_by(user_id=user_id).all()
-    return render_template('user.html', user=user, genres=genres, books=books, selected='users')
+    return render_template('user.html', user=user,
+                                        books=user.books,
+                                        genres=user.genres,
+                                        liked_books=[l.book for l in user.likes],
+                                        selected='users')
 
 def render_auth():
     return render_template('auth.html', selected='auth')
@@ -335,25 +377,25 @@ def render_auth():
 ###       Redicrect Functions        ###
 ########################################
 def redicrect_books():
-    return redirect('books')
+    return redirect('/books/')
 
 def redicrect_book(book_id):
-        return redirect('book/%s', book_id)
+        return redirect('/book/' + str(book_id))
 
 def redicrect_new_book():
-    return redicrect('newbook')
+    return redicrect('/newbook/')
 
 def redicrect_edit_book(book_id):
-    return redirect('editbook/%s', book_id)
+    return redirect('/editbook/' + str(book_id))
 
 def redicrect_genres():
-    return redirect('genres/')
+    return redirect('/genres/')
 
 def redicrect_genre(genre_id):
-    return redirect('genre/%s', genre_id)
+    return redirect('/genre/' + str(genre_id))
 
 def redicrect_user(user_id):
-    return redirect('user/%s', user_id)
+    return redirect('/user/' + str(user_id))
 
 
 ########################################
@@ -373,7 +415,13 @@ def bookJSON(book_id):
     if error:
         return jsonify(error=error)
     book = session.query(Book).filter_by(id=book_id).one()
-    return jsonify(book=book.serialize)
+    likes = session.query(Like).filter_by(book_id=book_id).all()
+    social = {
+    'likes_count': len(likes),
+    'owner_id': book.user_id,
+    'created_at': book.created_at
+    }
+    return jsonify(book_info=book.serialize, social=social)
 
 
 # List all Genres
@@ -409,11 +457,10 @@ def userJSON(user_id):
         return jsonify(error=error)
 
     user = session.query(User).filter_by(id=user_id).one()
-    genres = session.query(Genre).filter_by(user_id=user_id).all()
-    books = session.query(Book).filter_by(user_id=user_id).all()
     return jsonify(user_info=user.serialize,
-                   genres=[c.id for c in genres],
-                   books=[b.id for b in books])
+                   genres=[g.id for g in user.genres],
+                   books=[b.id for b in user.books],
+                   liked_books=[l.book_id for l in user.likes])
 
 
 
