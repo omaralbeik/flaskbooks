@@ -13,24 +13,23 @@
 <div class="container-info">
   <div class="row">
     <div class="col-md-4 col-sm-8">
-      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+      <img class="rounded img-fluid" src="{{ book.cover_or_placeholder_url }}" alt="{{ book.name }}">
     </div>
     <div class="col-md-8 col-sm-12">
       <h1>{{ book.name }}</h1>
       {% if book.author_name %}
-      <p>by {{ book.author_name }}</p>
+      <p>by <a target="_blank" href="https://www.google.com/?q={{ book.author_name }}">{{ book.author_name }}</a></p>
       {% endif %}
 
       {% if is_liked %}
       <form action="{{ url_for('dislikeBook', book_id=book.id) }}" method="post">
-        <input class="btn btn-primary" type="submit" name="" value="Dislike {% if likes_count %}({{ likes_count }}){% endif %}">
+        <input class="btn btn-primary" type="submit" name="" value="Dislike {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
       </form>
       {% else %}
       <form action="{{ url_for('likeBook', book_id=book.id) }}" method="post">
-        <input class="btn btn-secondary" type="submit" name="" value="Like {% if likes_count %}({{ likes_count }}){% endif %}">
+        <input class="btn btn-secondary" type="submit" name="" value="Like {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
       </form>
       {% endif %}
-
 
       {% if book.description %}
       <p>{{ book.description }}</p>
@@ -38,26 +37,25 @@
 
       <br>
 
-      {% if book.genre_id %}
-      <p>Genre
-        <a href="{{ url_for('genre', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
-      </p>
+      {% if book.genres|length > 0 %}
+      <p>Genres</p>
+      {% for g in book.genres %}
+      <ul>
+        <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }}</a>
+      </ul>
+      {% endfor %}
       {% endif %}
 
       {% if book.year %}
       <p>Release Date {{ book.year }}</p>
       {% endif %}
 
-      {% if book.pages_count %}
-      <p>Pages count {{ book.pages_count }}</p>
-      {% endif %}
-
-      {% if book.price %}
-      <p>Price ${{ book.price }}</p>
+      {% if book.page_count %}
+      <p>Page count {{ book.page_count }}</p>
       {% endif %}
 
       <p>Added by
-        <a href="{{ url_for('user', user_id=book.user_id) }}">{{ book.user.name() }}</a>
+        <a href="{{ url_for('user', user_id=book.owner_id) }}">{{ book.owner.name_or_email }}</a>
       </p>
       <br>
       <a href="{{ url_for('editBook', book_id=book.id) }}" class="btn btn-primary">Edit Book</a>

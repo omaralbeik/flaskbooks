@@ -3,16 +3,20 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, User, Genre, Book, Like
+from database_setup import Base, User, Genre, Book, Like, db_name
 from helpers import *
 
 app = Flask(__name__)
 
 # Connect to the database and create a database session
-engine = create_engine('sqlite:///flask_books.db')
+engine = create_engine(db_name)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
+
+
+# TODO fix this after adding auth
+temp_user_id = 3
 
 
 ########################################
@@ -39,23 +43,19 @@ def newBook():
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
-        genre_id = request.form['genre_id']
         cover_image_url = request.form['cover_image_url']
-        pages_count = request.form['pages_count']
+        page_count = request.form['page_count']
         author_name = request.form['author_name']
         year = request.form['year']
-        price = request.form['price']
 
         if not name:
             flash("Please enter book name", "danger")
             return render_new_book(name=name,
             description=description,
-            genre_id=genre_id,
             cover_image_url=cover_image_url,
-            pages_count=pages_count,
+            page_count=page_count,
             author_name=author_name,
-            year=year,
-            price=price)
+            year=year)
 
         if not genre_id:
             flash("Please select a genre", "danger")
@@ -68,7 +68,7 @@ def newBook():
             year=year,
             price=price)
 
-        book = Book(name=name, genre_id=genre_id, user_id=2)
+        book = Book(name=name, genre_id=genre_id, user_id=temp_user_id)
 
         book.description = description if description else None
         book.cover_image_url = cover_image_url if cover_image_url else None
@@ -91,30 +91,33 @@ def editBook(book_id):
     if request.method == 'POST':
         name = request.form['name']
         description = request.form['description']
-        genre_id = request.form['genre_id']
+        genres_ids = request.form.getlist('genres')
         cover_image_url = request.form['cover_image_url']
-        pages_count = request.form['pages_count']
+        page_count = request.form['page_count']
         author_name = request.form['author_name']
         year = request.form['year']
-        price = request.form['price']
 
         if not name:
             flash("Please enter book name", "danger")
             return render_edit_book(book_id=book_id)
 
-        if not genre_id:
-            flash("Please select a genre", "danger")
-            return render_edit_book(book_id=book_id)
-
         book = session.query(Book).filter_by(id=book_id).one()
 
-        book.genre_id = genre_id
+        book.name = name
         book.description = description if description else None
         book.cover_image_url = cover_image_url if cover_image_url else None
-        book.pages_count = pages_count if pages_count else None
+        book.page_count = page_count if page_count else None
         book.author_name = author_name if author_name else None
         book.year = year if year else None
-        book.price = price if price else None
+
+        genres = []
+        for id in genres_ids:
+            g = session.query(Genre).filter_by(id=id).one()
+            if g:
+                genres.append(g)
+
+        book.genres = []
+        book.genres = genres
 
         session.add(book)
         session.commit()
@@ -141,13 +144,13 @@ def likeBook(book_id):
     if request.method == 'GET':
         return render_book(book_id)
 
-    if validateBook(book_id) or validateUser(2):
+    if validateBook(book_id) or validateUser(temp_user_id):
         return redicrect_book(book_id)
 
-    like = session.query(Like).filter_by(book_id=book_id, user_id=2).all()
+    like = session.query(Like).filter_by(book_id=book_id, user_id=temp_user_id).all()
 
     if not like:
-        like = Like(book_id=book_id, user_id=2)
+        like = Like(book_id=book_id, user_id=temp_user_id)
         session.add(like)
         session.commit()
 
@@ -160,10 +163,10 @@ def dislikeBook(book_id):
         return render_book(book_id)
 
     if request.method == 'POST':
-        if validateBook(book_id) or validateUser(2):
+        if validateBook(book_id) or validateUser(temp_user_id):
             return redicrect_book(book_id)
 
-        like = session.query(Like).filter_by(book_id=book_id, user_id=2).one()
+        like = session.query(Like).filter_by(book_id=book_id, user_id=temp_user_id).one()
 
         if like:
             session.delete(like)
@@ -181,7 +184,7 @@ def genres():
 @app.route('/genre/<int:genre_id>/')
 def genre(genre_id):
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_genre(genre_id, books=genre.books)
+    return render_genre(genre_id)
 
 # Show new genre
 @app.route('/genres/new/', methods=['GET', 'POST'])
@@ -302,101 +305,108 @@ def signUp():
     return redicrect_books()
 
 
+
 ########################################
 ###        Render Functions          ###
 ########################################
 
-def render_books():
+def render_books(**kwargs):
     books = session.query(Book).all()
-    return render_template('books.html', books=books, selected='books')
+    return render_template('books.html', books=books, selected='books', **kwargs)
 
-def render_book(book_id):
+
+def render_book(book_id, **kwargs):
     book = session.query(Book).filter_by(id=book_id).one()
-    likes = session.query(Like).filter_by(book_id=book_id).all()
-    user = session.query(User).filter_by(id=2).one()
-    liked_ids = [l.book_id for l in user.likes]
-    is_liked = book_id in liked_ids
-    return render_template('book.html', book=book, selected='books', likes_count=len(likes), is_liked=is_liked)
+    is_liked = temp_user_id in [l.user_id for l in book.likes]
+    return render_template('book.html', book=book, selected='books', is_liked=is_liked, **kwargs)
+
 
 def render_new_book(**kwargs):
     genres = session.query(Genre).all()
     return render_template('newbook.html', genres=genres, selected='books', **kwargs)
+
 
 def render_edit_book(book_id, **kwargs):
     book = session.query(Book).filter_by(id=book_id).one()
     genres = session.query(Genre).all()
     return render_template('editbook.html', book=book, genres=genres, selected='books', **kwargs)
 
-def render_delete_book(book_id):
+
+def render_delete_book(book_id, **kwargs):
     book = session.query(Book).filter_by(id=book_id).one()
-    return render_template('deletebook.html', book=book, selected='books')
+    return render_template('deletebook.html', book=book, selected='books', **kwargs)
 
 
-
-def render_genres():
+def render_genres(**kwargs):
     genres = session.query(Genre).all()
-    books = session.query(Book).all()
-    counts = dict()
-    for b in books:
-        counts[b.genre_id] = counts.get(b.genre_id, 0) + 1
-    return render_template('genres.html', genres=genres, books_count=counts, selected='genres')
+    return render_template('genres.html', genres=genres, selected='genres', **kwargs)
+
 
 def render_genre(genre_id, **kwargs):
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    books = session.query(Book).filter_by(genre_id=genre_id)
     return render_template('genre.html', genre=genre, selected='genres', **kwargs)
+
 
 def render_new_genre(**kwargs):
     return render_template('newgenre.html', selected='genres', **kwargs)
+
 
 def render_edit_genre(genre_id, **kwargs):
     genre = session.query(Genre).filter_by(id=genre_id).one()
     return render_template('editgenre.html', genre=genre, **kwargs)
 
-def render_delete_genre(genre_id):
+
+def render_delete_genre(genre_id, **kwargs):
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('deletegenre.html', genre=genre, selected='genres')
+    return render_template('deletegenre.html', genre=genre, selected='genres', **kwargs)
 
 
-
-def render_users():
+def render_users(**kwargs):
     users = session.query(User).all()
-    return render_template('users.html', users=users, selected='users')
+    return render_template('users.html', users=users, selected='users', **kwargs)
 
-def render_user(user_id):
+
+def render_user(user_id, **kwargs):
     user = session.query(User).filter_by(id=user_id).one()
-    return render_template('user.html', user=user,
-                                        books=user.books,
-                                        genres=user.genres,
-                                        liked_books=[l.book for l in user.likes],
-                                        selected='users')
+    return render_template('user.html', user=user, selected='users', **kwargs)
 
-def render_auth():
-    return render_template('auth.html', selected='auth')
+
+def render_auth(**kwargs):
+    return render_template('auth.html', selected='auth', **kwargs)
+
 
 ########################################
 ###       Redicrect Functions        ###
 ########################################
+
 def redicrect_books():
     return redirect('/books/')
+
 
 def redicrect_book(book_id):
         return redirect('/book/' + str(book_id))
 
+
 def redicrect_new_book():
     return redicrect('/newbook/')
+
 
 def redicrect_edit_book(book_id):
     return redirect('/editbook/' + str(book_id))
 
+
 def redicrect_genres():
     return redirect('/genres/')
+
 
 def redicrect_genre(genre_id):
     return redirect('/genre/' + str(genre_id))
 
+
 def redicrect_user(user_id):
     return redirect('/user/' + str(user_id))
+
+
 
 
 ########################################
@@ -409,6 +419,7 @@ def booksJSON():
     books = session.query(Book).all()
     return jsonify(books=[b.serialize for b in books])
 
+
 # List Book info
 @app.route('/book/<int:book_id>/JSON')
 def bookJSON(book_id):
@@ -416,13 +427,7 @@ def bookJSON(book_id):
     if error:
         return jsonify(error=error)
     book = session.query(Book).filter_by(id=book_id).one()
-    likes = session.query(Like).filter_by(book_id=book_id).all()
-    social = {
-    'likes_count': len(likes),
-    'owner_id': book.user_id,
-    'created_at': book.created_at
-    }
-    return jsonify(book_info=book.serialize, social=social)
+    return jsonify(book.serialize)
 
 
 # List all Genres
@@ -439,7 +444,7 @@ def genreJSON(genre_id):
     if error:
         return jsonify(error=error)
     genre = session.query(Genre).filter_by(id=genre_id).one()
-    return jsonify(name=genre.name, books_count=len(genre.books), books=[b.id for b in genre.books])
+    return jsonify(genre.serialize)
 
 
 # List all Users
@@ -457,14 +462,12 @@ def userJSON(user_id):
         return jsonify(error=error)
 
     user = session.query(User).filter_by(id=user_id).one()
-    return jsonify(user_info=user.serialize,
-                   genres=[g.id for g in user.genres],
-                   books=[b.id for b in user.books],
-                   liked_books=[l.book_id for l in user.likes])
+    return jsonify(user.serialize)
+
 
 
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=5000)

@@ -1,11 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, User, Genre, Book
+from database_setup import Base, User, Genre, Book, db_name
 from api_errors import APIError
 
 # Connect to the database and create a database session
-engine = create_engine('sqlite:///flask_books.db')
+engine = create_engine(db_name)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()

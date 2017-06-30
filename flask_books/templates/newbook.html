@@ -26,33 +26,30 @@ New Book
       <label for="description">Description</label>
       <textarea class="form-control" name="description" id="description" rows="3">{{ description }}</textarea>
     </div>
+
     <div class="form-group">
-        <label for="genre_id">Genre*</label>
-        <select class="form-control" name="genre_id" id="genre_id">
-          {% for g in genres %}
-          <option value="{{ g.id }}">{{ g.name }}</option>
-          {% endfor %}
-        </select>
+      <label for="genres">Genres</label>
+          <select multiple class="form-control" name="genres" id="genres" size="{{ genres|length }}">
+            {% for g in genres %}
+            <option value="{{ g.id }}">{{ g.name }}</option>
+            {% endfor %}
+          </select>
       </div>
       <div class="form-group">
         <label for="cover_image_url">Cover image URL</label>
         <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="website.com/cover.jpg" value="{{ cover_image_url }}">
       </div>
       <div class="form-group">
-        <label for="pages_count">Pages count</label>
-        <input type="number" min="1" class="form-control" name="pages_count" id="pages_count" placeholder="Pages Count", value="{{ pages_count }}">
+        <label for="page_count">Page Count</label>
+        <input type="number" min="1" class="form-control" name="page_count" id="page_count" placeholder="Page Count", value="{{ page_count }}">
       </div>
       <div class="form-group">
-        <label for="pages_count">Author Name</label>
+        <label for="author_name">Author Name</label>
         <input type="text" class="form-control" name="author_name" id="author_name" placeholder="Author Name", value="{{ author_name }}">
       </div>
       <div class="form-group">
         <label for="year">Release Year</label>
         <input type="number" min="1" class="form-control" name="year" id="year" placeholder="Year" value="{{ year }}">
-      </div>
-      <div class="form-group">
-        <label for="price">Price</label>
-        <input type="number" min="0" step="0.01" class="form-control" name="price" id="price" placeholder="Price" value="{{ price }}">
       </div>
       <input type="submit" class="btn btn-primary" value="Create">
       <a href="{{ url_for('books') }}" class="btn btn-secondary">Cancel</a>

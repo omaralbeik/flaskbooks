@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ user.name() }}
+{{ user.name_or_email }}
 {% endblock %}
 
 {% block head %}
@@ -12,18 +12,18 @@
 
 <div class="row subtitle">
   <div class="col-10">
-    <h1>{{ user.name() }}</h1>
+    <h1>{{ user.name_or_email }}</h1>
     {% if user.email %}
     <a href="mailto:{{user.email}}">{{ user.email }}</a>
     {% endif %}
-    <p>Member since {{ user.created_at.date() }}</p>
+    <p>Member since {{ user.date_joined.date() }}</p>
   </div>
 </div>
 
-{% if genres|length > 0 %}
+{% if user.genres|length > 0 %}
 <h2>Genres</h2>
 <ul class="list-unstyled">
-  {% for g in genres %}
+  {% for g in user.genres %}
   <li>
     <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }}</a>
   </li>
@@ -31,24 +31,20 @@
 </ul>
 {% endif %}
 
-{% if books|length > 0 %}
+{% if user.books|length > 0 %}
 <h2>Books</h2>
 <ul class="list-unstyled">
-  {% for b in books %}
-  <a href="{{ url_for('book', book_id=b.id) }}">
-    <img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}">
-  </a>
+  {% for b in user.books %}
+  <a href="{{ url_for('book', book_id=b.id) }}"><img class="book-img rounded" src="{{ b.cover_or_placeholder_url }}" alt="{{ b.name }}"></a>
   {% endfor %}
 </ul>
 {% endif %}
 
-{% if liked_books|length > 0 %}
+{% if user.likes|length > 0 %}
 <h2>Liked Books</h2>
 <ul class="list-unstyled">
-  {% for b in liked_books %}
-  <a href="{{ url_for('book', book_id=b.id) }}">
-    <img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}">
-  </a>
+  {% for l in user.likes %}
+  <a href="{{ url_for('book', book_id=l.book_id) }}"><img class="book-img rounded" src="{{ l.book.cover_or_placeholder_url }}" alt="{{ l.book.name }}"></a>
   {% endfor %}
 </ul>
 {% endif %}

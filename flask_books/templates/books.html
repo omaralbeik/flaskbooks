@@ -17,7 +17,7 @@ Books
 </div>
 <ul class="list-unstyled">
   {% for b in books %}
-  <a href="{{ url_for('book', book_id=b.id) }}"><img class="book-img rounded" src="{{ b.cover_image_url }}" alt="{{ b.name }}"></a>
+  <a href="{{ url_for('book', book_id=b.id) }}"><img class="book-img rounded" src="{{ b.cover_or_placeholder_url }}" alt="{{ b.name }}"></a>
   {% endfor %}
 </ul>
 {% endblock %}

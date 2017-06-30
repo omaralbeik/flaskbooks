@@ -1,11 +1,19 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey, Date, Integer, Float, String, Text, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Table, Column, ForeignKey, create_engine
+from sqlalchemy import Date, Integer, Float, String, Text, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy import create_engine
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy_utils.functions import database_exists, drop_database
+from flask import url_for
 
+db_name = 'sqlite:///flask_books.db'
 Base = declarative_base()
+
+genre_book_association_table = Table('genre_book_association', Base.metadata,
+    Column('book_id', Integer, ForeignKey('book.id')),
+    Column('genre_id', Integer, ForeignKey('genre.id'))
+)
 
 
 class User(Base):
@@ -13,57 +21,39 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False)
-    first_name = Column(String(250), nullable=True)
-    last_name = Column(String(250), nullable=True)
-    photo_url = Column(String(750), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    name = Column(String(250), nullable=True)
+    date_joined = Column(DateTime, default=datetime.datetime.utcnow)
 
-    books = relationship('Book', backref='owner', lazy=True)
-    genres = relationship('Genre', backref='owner', lazy=True)
-    likes = relationship('Like', backref='owner', lazy=True)
+    books = relationship('Book')
+    genres = relationship('Genre')
+    likes = relationship('Like')
 
     @property
     def serialize(self):
         # Returns user data in easily serializeable format
-        dict = {
-            'id': self.id,
+        info_dict = {
             'email': self.email,
-            'created_at': self.created_at
+            'date_joined': self.date_joined
         }
-        if self.first_name:
-            dict["first_name"] = self.first_name
-        if self.last_name:
-            dict["last_name"] = self.last_name
-        if self.photo_url:
-            dict["photo_url"] = self.photo_url
-        return dict
+        if self.name:
+            info_dict["name"] = self.name
 
-    def name(self):
-        if self.first_name and self.last_name:
-            return self.first_name + " " + self.last_name
-        else:
-            return self.email
+        genres_ids = [g.id for g in self.genres]
+        books_ids = [b.id for b in self.books]
+        liked_books=[l.book_id for l in self.likes]
 
-class Genre(Base):
-    __tablename__ = 'genre'
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False, unique=True)
-
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
-
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    books = relationship('Book', backref='parent_genre', lazy=True)
-
-    @property
-    def serialize(self):
-        # Returns genre data in easily serializeable format
         return {
             'id': self.id,
-            'name': self.name,
-            'created_at': self.created_at
+            'user_info': info_dict,
+            'books': books_ids,
+            'genres': genres_ids,
+            'liked_books': liked_books
         }
+
+    @property
+    def name_or_email(self):
+        return self.name if self.name else self.email
+
 
 
 class Book(Base):
@@ -73,45 +63,99 @@ class Book(Base):
     name = Column(String(250), nullable=False)
     description = Column(Text, nullable=True)
     cover_image_url = Column(String(750), nullable=True)
-    pages_count = Column(Integer, nullable=True)
+    page_count = Column(Integer, nullable=True)
     author_name = Column(String(250), nullable=True)
     year = Column(Integer, nullable=True)
-    price = Column(Float, nullable=True)
+    date_created = Column(DateTime, default=datetime.datetime.utcnow)
 
-    genre_id = Column(Integer, ForeignKey('genre.id'))
-    genre = relationship(Genre)
+    owner_id = Column(Integer, ForeignKey('user.id'))
+    owner = relationship(User)
 
-    user_id = Column(Integer, ForeignKey('user.id'))
-    user = relationship(User)
+    likes = relationship('Like')
 
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    genres = relationship('Genre',
+                          secondary=genre_book_association_table,
+                          back_populates="books")
+
+
+    @property
+    def cover_or_placeholder_url(self):
+        if self.cover_image_url:
+            return self.cover_image_url
+        else:
+            return url_for('static', filename='images/placeholder_book.jpg')
+
 
     @property
     def serialize(self):
         # Returns book data in easily serializeable format
-        dict = {
-        'id': self.id,
-        'name': self.name,
-        'genre_id': self.genre_id,
+
+        info_dict = {
+            'name': self.name,
+            'date_created': self.date_created
         }
         if self.description:
-            dict['description'] = self.description
+            info_dict['description'] = self.description
+        if self.genres:
+            info_dict['genres'] = [g.id for g in self.genres]
         if self.cover_image_url:
-            dict['cover_image_url'] = self.cover_image_url
-        if self.pages_count:
-            dict['pages_count'] = self.pages_count
+            info_dict['cover_image_url'] = self.cover_image_url
+        if self.page_count:
+            info_dict['page_count'] = self.page_count
         if self.author_name:
-            dict['author_name'] = self.author_name
+            info_dict['author_name'] = self.author_name
         if self.year:
-            dict['year'] = self.year
-        if self.price:
-            dict['price'] = self.price
-        return dict
+            info_dict['year'] = self.year
+
+        social_dict = {
+            'likes_count': len(self.likes),
+            'owner_id': self.owner_id,
+            'date_created': self.date_created
+        }
+
+        return {
+            'id': self.id, 'book_info': info_dict, 'social': social_dict
+        }
+
+
+
+class Genre(Base):
+    __tablename__ = 'genre'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False, unique=True)
+    date_created = Column(DateTime, default=datetime.datetime.utcnow)
+
+    owner_id = Column(Integer, ForeignKey('user.id'))
+    owner = relationship(User)
+
+    books = relationship('Book',
+                          secondary=genre_book_association_table,
+                          back_populates="genres")
+
+    @property
+    def serialize(self):
+        # Returns genre data in easily serializeable format
+        info_dict = {
+            'name': self.name,
+            'book_count': len(self.books)
+
+        }
+        books_ids = [b.id for b in self.books]
+        return {
+            'id': self.id,
+            'genre_info': info_dict,
+            'books': books_ids
+        }
+
+
 
 class Like(Base):
     __tablename__ = 'like'
 
     id = Column(Integer, primary_key=True)
+    date_created = Column(DateTime, default=datetime.datetime.utcnow)
 
     book_id = Column(Integer, ForeignKey('book.id'))
     book = relationship(Book)
@@ -119,10 +163,15 @@ class Like(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
 
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+# Run only from this file (not when improting into other files)
+if __name__ == "__main__":
+    # Drop old database if exists
+    if database_exists(db_name):
+        drop_database(db_name)
 
-engine = create_engine('sqlite:///flask_books.db')
-Base.metadata.create_all(engine)
+    # Create engine
+    engine = create_engine(db_name)
+    Base.metadata.create_all(engine)
 
-print("Database created!")
+    print("Database created!")

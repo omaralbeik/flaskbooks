@@ -12,7 +12,7 @@ Edit {{ book.name }}
 <div class="container-info">
   <div class="row">
     <div class="col-md-4 col-sm-8">
-      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+      <img class="rounded img-fluid" src="{{ book.cover_or_placeholder_url }}" alt="{{ book.name }}">
     </div>
     <div class="col-md-8 col-sm-12">
       <form action="{{ url_for('deleteBook', book_id=book.id) }}" method="post">

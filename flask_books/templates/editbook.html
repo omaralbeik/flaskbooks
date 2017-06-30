@@ -11,57 +11,46 @@ Edit {{ book.name }}
 {% block content %}
 
 <div class="container-info">
-  <div class="row">
-    <div class="col-md-4 col-sm-8">
-      <img class="rounded img-fluid" src="{{ book.cover_image_url }}" alt="{{ book.name }}">
+  <form action="{{ url_for('editBook', book_id=book.id) }}" method="post">
+    <div class="form-group">
+      <label for="name">Name*</label>
+      <input type="text" class="form-control" name="name" id="name" placeholder="Book Name" value="{{ book.name }}">
     </div>
-    <div class="col-md-8 col-sm-12">
-      <form action="{{ url_for('editBook', book_id=book.id) }}" method="post">
-        <div class="form-group">
-          <label for="name">Name*</label>
-          <input type="text" class="form-control" name="name" id="name" placeholder="Book Name" value="{{ book.name }}">
-        </div>
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea class="form-control" name="description" id="description" rows="3">{{ book.description }}</textarea>
-        </div>
-        <div class="form-group">
-            <label for="genre_id">Genre*</label>
-            <select class="form-control" name="genre_id" id="genre_id">
-              {% for g in genres %}
-              {% if g.id == book.genre_id %}
-              <option selected value="{{ g.id }}">{{ g.name }}</option>
-              {% else %}
-              <option value="{{ g.id }}">{{ g.name }}</option>
-              {% endif %}
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="cover_image_url">Cover image URL</label>
-            <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="website.com/cover.jpg" value="{{ book.cover_image_url }}">
-          </div>
-          <div class="form-group">
-            <label for="pages_count">Pages Count</label>
-            <input type="number" min="1" class="form-control" name="pages_count" id="pages_count" placeholder="Pages Count" value="{{ book.pages_count }}">
-          </div>
-          <div class="form-group">
-            <label for="pages_count">Author Name</label>
-            <input type="text" class="form-control" name="author_name" id="author_name" placeholder="Author Name" value="{{ book.author_name }}">
-          </div>
-          <div class="form-group">
-            <label for="year">Release Year</label>
-            <input type="number" min="1" class="form-control" name="year" id="year" placeholder="Year" value="{{ book.year }}">
-          </div>
-          <div class="form-group">
-            <label for="price">Price</label>
-            <input type="number" min="0" step="0.01" class="form-control" name="price" id="price" placeholder="Price" value="{{ book.price }}">
-          </div>
-          <input type="submit" class="btn btn-primary" value="Save">
-          <a href="{{ url_for('book', book_id=book.id) }}" class="btn btn-secondary">Cancel</a>
-      </form>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea class="form-control" name="description" id="description" rows="3">{{ book.description }}</textarea>
     </div>
-  </div>
+    <div class="form-group">
+      <label for="genres">Genres</label>
+          <select multiple class="form-control" name="genres" id="genres" size="{{ genres|length }}">
+            {% for g in genres %}
+            {% if g in book.genres %}
+            <option selected value="{{ g.id }}">{{ g.name }}</option>
+            {% else %}
+            <option value="{{ g.id }}">{{ g.name }}</option>
+            {% endif %}
+            {% endfor %}
+          </select>
+      </div>
+      <div class="form-group">
+        <label for="cover_image_url">Cover image URL</label>
+        <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="website.com/cover.jpg" value="{{ book.cover_image_url }}">
+      </div>
+      <div class="form-group">
+        <label for="page_count">Page Count</label>
+        <input type="number" min="1" class="form-control" name="page_count" id="page_count" placeholder="Page Count", value="{{ book.page_count }}">
+      </div>
+      <div class="form-group">
+        <label for="author_name">Author Name</label>
+        <input type="text" class="form-control" name="author_name" id="author_name" placeholder="Author Name", value="{{ book.author_name }}">
+      </div>
+      <div class="form-group">
+        <label for="year">Release Year</label>
+        <input type="number" min="1" class="form-control" name="year" id="year" placeholder="Year" value="{{ book.year }}">
+      </div>
+      <input type="submit" class="btn btn-primary" value="Save">
+      <a href="{{ url_for('books') }}" class="btn btn-secondary">Cancel</a>
+  </form>
 </div>
 
 {% endblock %}
