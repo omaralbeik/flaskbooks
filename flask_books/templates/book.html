@@ -31,10 +31,7 @@
       </form>
       {% endif %}
 
-      {% if book.description %}
-      <p>{{ book.description }}</p>
-      {% endif %}
-
+      <p>{{ book.description or '' }}</p>
       <br>
 
       {% if book.genres|length > 0 %}

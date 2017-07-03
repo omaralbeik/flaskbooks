@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, User, Genre, Book, db_name
-
+from model import Base, User, Book, Genre, Like, db_name
 
 engine = create_engine(db_name)
 Base.metadata.bind = engine

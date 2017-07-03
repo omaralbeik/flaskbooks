@@ -24,7 +24,7 @@ New Book
     </div>
     <div class="form-group">
       <label for="description">Description</label>
-      <textarea class="form-control" name="description" id="description" rows="3">{{ description }}</textarea>
+      <textarea class="form-control" name="description" id="description" rows="3">{{ description or '' }}</textarea>
     </div>
 
     <div class="form-group">
@@ -37,19 +37,19 @@ New Book
       </div>
       <div class="form-group">
         <label for="cover_image_url">Cover image URL</label>
-        <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="website.com/cover.jpg" value="{{ cover_image_url }}">
+        <input type="text" class="form-control" name="cover_image_url" id="cover_image_url" placeholder="website.com/cover.jpg" value="{{ cover_image_url or '' }}">
       </div>
       <div class="form-group">
         <label for="page_count">Page Count</label>
-        <input type="number" min="1" class="form-control" name="page_count" id="page_count" placeholder="Page Count", value="{{ page_count }}">
+        <input type="number" min="1" class="form-control" name="page_count" id="page_count" placeholder="Page Count", value="{{ page_count or '' }}">
       </div>
       <div class="form-group">
         <label for="author_name">Author Name</label>
-        <input type="text" class="form-control" name="author_name" id="author_name" placeholder="Author Name", value="{{ author_name }}">
+        <input type="text" class="form-control" name="author_name" id="author_name" placeholder="Author Name", value="{{ author_name or ''}}">
       </div>
       <div class="form-group">
         <label for="year">Release Year</label>
-        <input type="number" min="1" class="form-control" name="year" id="year" placeholder="Year" value="{{ year }}">
+        <input type="number" min="1" class="form-control" name="year" id="year" placeholder="Year" value="{{ year or '' }}">
       </div>
       <input type="submit" class="btn btn-primary" value="Create">
       <a href="{{ url_for('books') }}" class="btn btn-secondary">Cancel</a>

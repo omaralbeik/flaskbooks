@@ -1,12 +1,14 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, request, flash, jsonify, url_for
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Base, User, Genre, Book, Like, db_name
+from model import Base, User, Book, Genre, Like, db_name
 from helpers import *
+from errors import HTMLError, JSONError
 
 app = Flask(__name__)
+
 
 # Connect to the database and create a database session
 engine = create_engine(db_name)
@@ -19,9 +21,10 @@ session = DBSession()
 temp_user_id = 3
 
 
-########################################
-###          HTML Endpoints          ###
-########################################
+
+################################################################################
+###                              HTML Endpoints                              ###
+################################################################################
 
 # Show all books
 @app.route('/')
@@ -41,15 +44,16 @@ def newBook():
         return render_new_book()
 
     if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        cover_image_url = request.form['cover_image_url']
-        page_count = request.form['page_count']
-        author_name = request.form['author_name']
-        year = request.form['year']
+        name = request.form['name'] or None
+        description = request.form['description'] or None
+        genres_ids = request.form.getlist('genres') or []
+        cover_image_url = request.form['cover_image_url'] or None
+        page_count = request.form['page_count'] or None
+        author_name = request.form['author_name'] or None
+        year = request.form['year'] or None
 
         if not name:
-            flash("Please enter book name", "danger")
+            flash(HTMLError.noBookName, "danger")
             return render_new_book(name=name,
             description=description,
             cover_image_url=cover_image_url,
@@ -57,25 +61,21 @@ def newBook():
             author_name=author_name,
             year=year)
 
-        if not genre_id:
-            flash("Please select a genre", "danger")
-            return render_new_book(name=name,
-            description=description,
-            genre_id=genre_id,
-            cover_image_url=cover_image_url,
-            pages_count=pages_count,
-            author_name=author_name,
-            year=year,
-            price=price)
+        book = Book(name=name, owner_id=temp_user_id)
 
-        book = Book(name=name, genre_id=genre_id, user_id=temp_user_id)
+        book.description = description
+        book.cover_image_url = cover_image_url
+        book.page_count = page_count
+        book.author_name = author_name
+        book.year = year
 
-        book.description = description if description else None
-        book.cover_image_url = cover_image_url if cover_image_url else None
-        book.pages_count = pages_count if pages_count else None
-        book.author_name = author_name if author_name else None
-        book.year = year if year else None
-        book.price = price if price else None
+        genres = []
+        for id in genres_ids:
+            g = session.query(Genre).filter_by(id=id).one()
+            if g:
+                genres.append(g)
+
+        book.genres = genres
 
         session.add(book)
         session.commit()
@@ -89,26 +89,26 @@ def editBook(book_id):
         return render_edit_book(book_id)
 
     if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
-        genres_ids = request.form.getlist('genres')
-        cover_image_url = request.form['cover_image_url']
-        page_count = request.form['page_count']
-        author_name = request.form['author_name']
-        year = request.form['year']
+        name = request.form['name'] or None
+        description = request.form['description'] or None
+        genres_ids = request.form.getlist('genres') or []
+        cover_image_url = request.form['cover_image_url'] or None
+        page_count = request.form['page_count'] or None
+        author_name = request.form['author_name'] or None
+        year = request.form['year'] or None
 
         if not name:
-            flash("Please enter book name", "danger")
+            flash(HTMLError.noBookName, "danger")
             return render_edit_book(book_id=book_id)
 
         book = session.query(Book).filter_by(id=book_id).one()
 
         book.name = name
-        book.description = description if description else None
-        book.cover_image_url = cover_image_url if cover_image_url else None
-        book.page_count = page_count if page_count else None
-        book.author_name = author_name if author_name else None
-        book.year = year if year else None
+        book.description = description
+        book.cover_image_url = cover_image_url
+        book.page_count = page_count
+        book.author_name = author_name
+        book.year = year
 
         genres = []
         for id in genres_ids:
@@ -147,7 +147,8 @@ def likeBook(book_id):
     if validateBook(book_id) or validateUser(temp_user_id):
         return redicrect_book(book_id)
 
-    like = session.query(Like).filter_by(book_id=book_id, user_id=temp_user_id).all()
+    like = session.query(Like).filter_by(book_id=book_id,
+                                         user_id=temp_user_id).all()
 
     if not like:
         like = Like(book_id=book_id, user_id=temp_user_id)
@@ -166,7 +167,8 @@ def dislikeBook(book_id):
         if validateBook(book_id) or validateUser(temp_user_id):
             return redicrect_book(book_id)
 
-        like = session.query(Like).filter_by(book_id=book_id, user_id=temp_user_id).one()
+        like = session.query(Like).filter_by(book_id=book_id,
+                                             user_id=temp_user_id).one()
 
         if like:
             session.delete(like)
@@ -196,11 +198,11 @@ def newGenre():
         name = request.form['name']
 
         if not name:
-            flash("Please enter genre name", "danger")
+            flash(HTMLError.noGenreName, "danger")
             return render_new_genre()
 
         if session.query(Genre).filter_by(name=name).one():
-            flash("Genre already exist!", "danger")
+            flash(HTMLError.genreExists, "danger")
             return render_new_genre()
 
         genre = Genre(name=name, user_id=1)
@@ -219,7 +221,7 @@ def editGenre(genre_id):
         name = request.form['name']
 
         if not name:
-            flash("Please enter book name", "danger")
+            flash(HTMLError.noBookName, "danger")
             return render_new_genre()
 
         genre = session.query(Genre).filter_by(id=genre_id).one()
@@ -306,112 +308,9 @@ def signUp():
 
 
 
-########################################
-###        Render Functions          ###
-########################################
-
-def render_books(**kwargs):
-    books = session.query(Book).all()
-    return render_template('books.html', books=books, selected='books', **kwargs)
-
-
-def render_book(book_id, **kwargs):
-    book = session.query(Book).filter_by(id=book_id).one()
-    is_liked = temp_user_id in [l.user_id for l in book.likes]
-    return render_template('book.html', book=book, selected='books', is_liked=is_liked, **kwargs)
-
-
-def render_new_book(**kwargs):
-    genres = session.query(Genre).all()
-    return render_template('newbook.html', genres=genres, selected='books', **kwargs)
-
-
-def render_edit_book(book_id, **kwargs):
-    book = session.query(Book).filter_by(id=book_id).one()
-    genres = session.query(Genre).all()
-    return render_template('editbook.html', book=book, genres=genres, selected='books', **kwargs)
-
-
-def render_delete_book(book_id, **kwargs):
-    book = session.query(Book).filter_by(id=book_id).one()
-    return render_template('deletebook.html', book=book, selected='books', **kwargs)
-
-
-def render_genres(**kwargs):
-    genres = session.query(Genre).all()
-    return render_template('genres.html', genres=genres, selected='genres', **kwargs)
-
-
-def render_genre(genre_id, **kwargs):
-    genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('genre.html', genre=genre, selected='genres', **kwargs)
-
-
-def render_new_genre(**kwargs):
-    return render_template('newgenre.html', selected='genres', **kwargs)
-
-
-def render_edit_genre(genre_id, **kwargs):
-    genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('editgenre.html', genre=genre, **kwargs)
-
-
-def render_delete_genre(genre_id, **kwargs):
-    genre = session.query(Genre).filter_by(id=genre_id).one()
-    return render_template('deletegenre.html', genre=genre, selected='genres', **kwargs)
-
-
-def render_users(**kwargs):
-    users = session.query(User).all()
-    return render_template('users.html', users=users, selected='users', **kwargs)
-
-
-def render_user(user_id, **kwargs):
-    user = session.query(User).filter_by(id=user_id).one()
-    return render_template('user.html', user=user, selected='users', **kwargs)
-
-
-def render_auth(**kwargs):
-    return render_template('auth.html', selected='auth', **kwargs)
-
-
-########################################
-###       Redicrect Functions        ###
-########################################
-
-def redicrect_books():
-    return redirect('/books/')
-
-
-def redicrect_book(book_id):
-        return redirect('/book/' + str(book_id))
-
-
-def redicrect_new_book():
-    return redicrect('/newbook/')
-
-
-def redicrect_edit_book(book_id):
-    return redirect('/editbook/' + str(book_id))
-
-
-def redicrect_genres():
-    return redirect('/genres/')
-
-
-def redicrect_genre(genre_id):
-    return redirect('/genre/' + str(genre_id))
-
-
-def redicrect_user(user_id):
-    return redirect('/user/' + str(user_id))
-
-
-
-
-########################################
-###         JSON Endpoints           ###
-########################################
+################################################################################
+###                              JSON Endpoints                              ###
+################################################################################
 
 # List all Books
 @app.route('/books/JSON')
