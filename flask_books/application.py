@@ -364,7 +364,6 @@ def gDisconnect():
 
     if result['status'] == '200':
         clear_user_info(login_session)
-        login_session.clear()
     	return redirect_books()
 
     else:

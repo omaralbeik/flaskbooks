@@ -153,13 +153,6 @@ def generate_auth_state():
     return state
 
 def clear_user_info(login_session):
-    del login_session['access_token']
-    del login_session['gplus_id']
-    del login_session['provider']
-    del login_session['user_id']
-    del login_session['name']
-    del login_session['email']
-    del login_session['picture']
     login_session.clear()
 
 def save_user_info(login_session, credentials, data):
@@ -171,9 +164,20 @@ def save_user_info(login_session, credentials, data):
     login_session['picture'] = data['picture']
 
     user = get_user_by_email(data['email'])
-    user_id = user.id
-    if user_id:
-        login_session['user_id'] = user_id
+    if user:
+        login_session['user_id'] = user.id
+    else:
+        create_user_from_session(login_session)
+
+def create_user_from_session(login_session):
+    email = login_session.get('email')
+    if not email:
+        return
+    user = User(email=email)
+    user.name = login_session.get('name')
+    user.picture_url = login_session.get('picture')
+    session.add(user)
+    session.commit()
 
 def is_user_authenticated(login_session):
     return True if get_user_from_session(login_session) else False

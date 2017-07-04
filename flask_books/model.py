@@ -39,11 +39,11 @@ class User(Base):
         if self.name:
             info_dict['name'] = self.name
         if self.picture_url:
-            info_dict['picture_url']
+            info_dict['picture_url'] = self.picture_url
 
-        genres_ids = [g.id for g in self.genres]
         books_ids = [b.id for b in self.books]
-        liked_books=[l.book_id for l in self.likes]
+        genres_ids = [g.id for g in self.genres]
+        liked_books = [l.book_id for l in self.likes]
 
         return {
             'id': self.id,
@@ -75,8 +75,6 @@ class Book(Base):
     owner = relationship(User)
 
     likes = relationship('Like')
-
-
     genres = relationship('Genre',
                           secondary=genre_book_association_table,
                           back_populates='books')
