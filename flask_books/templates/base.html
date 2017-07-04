@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+  <script type="text/javascript" , src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
   {% block head %}
   <title>
     {% block title %}{% endblock %} - Flask book store
@@ -14,18 +17,39 @@
 
 <body>
 
-  <nav class="navbar sticky-top navbar-toggleable-md navbar-light bg-faded">
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+  <!-- Fixed navbar -->
+  <nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-inverse">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="/"><strong>Flask Books!</strong></a>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-item nav-link {% if selected=='books'%}active{% endif %}" href="{{ url_for('books') }}">Books</a>
-        <a class="nav-item nav-link {% if selected=='genres'%}active{% endif %}" href="{{ url_for('genres') }}">Genres</a>
-        <a class="nav-item nav-link {% if selected=='users'%}active{% endif %}" href="{{ url_for('users') }}">Users</a>
+    <a class="navbar-brand" href="/">Flask Books!</a>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item {% if selected=='books'%}active{% endif %}">
+          <a class="nav-link" href="{{ url_for('books') }}">Books</a>
+        </li>
+        <li class="nav-item {% if selected=='genres'%}active{% endif %}">
+          <a class="nav-link" href="{{ url_for('genres') }}">Genres</a>
+        </li>
+        <li class="nav-item {% if selected=='users'%}active{% endif %}">
+          <a class="nav-link" href="{{ url_for('users') }}">Users</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto">
+        {% if current_user %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            {{ current_user.name }}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="#">My Account</a>
+            <a class="dropdown-item" href="{{ url_for('gDisconnect') }}">Logout</a>
+          </div>
+        </li>
+        {% else %}
         <a class="nav-item nav-link {% if selected=='auth'%}active{% endif %}" href="{{ url_for('auth') }}">Login</a>
-      </div>
+        {% endif %}
+      </ul>
     </div>
   </nav>
 
@@ -38,8 +62,7 @@
           <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
-            </button>
-            {{ message }}
+            </button> {{ message }}
           </div>
         </li>
         {% endfor %}
@@ -48,8 +71,7 @@
     </div>
 
     <div class="container" id="content">
-      {% block content %}
-      {% endblock %}
+      {% block content %} {% endblock %}
     </div>
 
   </div>
@@ -57,19 +79,9 @@
   <footer class="footer">
     <div class="container">
       {% block footer %}
-      <span class="text-muted"><strong>Flask Books</strong> is another opensource project by <a target="_blank" href="https://www.github.com/omaralbeik">Omar Albeik</a></span>
-      {% endblock %}
+      <span class="text-muted"><strong>Flask Books</strong> is another opensource project by <a target="_blank" href="https://www.github.com/omaralbeik">Omar Albeik</a></span> {% endblock %}
     </div>
   </footer>
-
-  <script
-    src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-    integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="
-    crossorigin="anonymous"></script>
-  <script type="text/javascript", src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}">
-
-  </script>
-
 </body>
 
 </html>

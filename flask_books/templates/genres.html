@@ -12,14 +12,16 @@ Genres
 <div class="row subtitle">
   <div class="col-10">
     <h1>Genres</h1>
+    {% if current_user %}
     <a href="{{ url_for('newGenre') }}">Add New</a>
+    {% else %}
+    <a href="{{ url_for('auth') }}">Sign in to add genres!</a>
+    {% endif %}
   </div>
 </div>
 <ul class="list-unstyled">
   {% for g in genres %}
-  <li>
-    <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }} ({{ g.books|length }})</a>
-  </li>
+  <li><a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }} ({{ g.books|length }})</a></li>
   {% endfor %}
 </ul>
 {% endblock %}

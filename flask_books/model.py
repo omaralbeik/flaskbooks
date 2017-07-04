@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, ForeignKey
 from sqlalchemy import Integer, Float, String, Text, DateTime
 from sqlalchemy.orm import relationship, backref
-from flask import url_for
+from flask import url_for, jsonify
 
 db_name = 'sqlite:///flask_books.db'
 Base = declarative_base()
@@ -21,7 +21,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False)
-    name = Column(String(250), nullable=True)
+    name = Column(String(250), nullable=False)
+    picture_url = Column(String(250), nullable=True)
     date_joined = Column(DateTime, default=datetime.datetime.utcnow)
 
     books = relationship('Book')
@@ -36,7 +37,9 @@ class User(Base):
             'date_joined': self.date_joined
         }
         if self.name:
-            info_dict["name"] = self.name
+            info_dict['name'] = self.name
+        if self.picture_url:
+            info_dict['picture_url']
 
         genres_ids = [g.id for g in self.genres]
         books_ids = [b.id for b in self.books]
@@ -76,7 +79,7 @@ class Book(Base):
 
     genres = relationship('Genre',
                           secondary=genre_book_association_table,
-                          back_populates="books")
+                          back_populates='books')
 
 
     @property
@@ -131,7 +134,7 @@ class Genre(Base):
 
     books = relationship('Book',
                           secondary=genre_book_association_table,
-                          back_populates="genres")
+                          back_populates='genres')
 
     @property
     def serialize(self):

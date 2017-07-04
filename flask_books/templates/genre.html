@@ -12,9 +12,13 @@
 <div class="row subtitle">
   <div class="col-10">
     <h1>{{ genre.name }}</h1>
-    <a href="{{ url_for('editGenre', genre_id=genre.id) }}">Edit</a>
-    <br>
-    <a href="{{ url_for('deleteGenre', genre_id=genre.id) }}">Delete</a>
+    {% if current_user %}
+    {% if genre.owner_id == current_user.id %}
+      <a href="{{ url_for('editGenre', genre_id=genre.id) }}">Edit</a>
+      <br>
+      <a href="{{ url_for('deleteGenre', genre_id=genre.id) }}">Delete</a>
+    {% endif %}
+    {% endif %}
   </div>
 </div>
 <ul class="list-unstyled">

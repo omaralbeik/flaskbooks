@@ -6,55 +6,62 @@ Sign Up
 
 {% block head %}
 {{ super() }}
+<script src="//apis.google.com/js/platform.js?onload=start"></script>
 {% endblock %}
 
 {% block content %}
 
 <div class="container-info">
+  <div class="row " id="g-siginin-area">
+    <div class="col-md-12 col-sm-12 social-login">
+      <h2>Sign me in using my Google account!</h2>
+      <div id="signInButton">
+        <span class="g-signin"
+          data-scope="openid email"
+          data-clientid="166895269606-vpvjpqbb0h9bdul942du47jte451pgof.apps.googleusercontent.com"
+          data-redirecturi="postmessage"
+          data-accesstype="offline"
+          data-cookiepolicy="single_host_origin"
+          data-callback="signInCallback"
+          data-approvalprompt="force">
+        </span>
+      </div>
+      <p>We use your email for sign in only. No spam, we promise :)</p>
+    </div>
+  </div>
   <div class="row">
-    <div class="col-md-6 col-sm-12 sign-in">
-      <h2>Already have an account? Sign in here</h2>
-      <form action="{{ url_for('signIn') }}" method="post">
-        <div class="form-group">
-          <label for="email">Email*</label>
-          <input type="email" class="form-control" name="email" id="email" placeholder="example@email.com">
-        </div>
-        <div class="form-group">
-          <label for="password">Password*</label>
-          <input type="password" class="form-control" name="password" id="password" placeholder="●●●●●●●">
-        </div>
-          <input type="submit" class="btn btn-primary" value="Sign In">
-      </form>
-    </div>
-    <div class="col-md-6 col-sm-12 sign-up">
-      <h2>Sign up and become a member in here</h2>
-      <form action="{{ url_for('signUp') }}" method="post">
-        <div class="form-group">
-          <div class="form-group">
-            <label for="first_name">First Name</label>
-            <input type="text" class="form-control" name="first_name" id="first_name" placeholder="First Name">
-          </div>
-          <div class="form-group">
-            <label for="last_name">Last Name</label>
-            <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Last Name">
-          </div>
-          <label for="email">Email*</label>
-          <input type="email" class="form-control" name="email" id="email" placeholder="example@email.com">
-        </div>
-        <div class="form-group">
-          <label for="password">Password*</label>
-          <input type="password" class="form-control" name="password" id="password" placeholder="●●●●●●●">
-        </div>
-        <div class="form-group">
-          <label for="password2">Again..*</label>
-          <input type="password" class="form-control" name="password2" id="password2" placeholder="●●●●●●●">
-        </div>
-          <input type="submit" class="btn btn-primary" value="Creat Account">
-      </form>
-    </div>
+    <p id="result"></p>
   </div>
 </div>
 
-
+<script type="text/javascript">
+function signInCallback(authResult) {
+  if (authResult['code']) {
+    // Hide the sign-in button now that the user is authorized
+    $('#g-siginin-area').attr('style', 'display: none');
+    // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
+    $.ajax({
+      type: 'POST',
+      url: '/gconnect?state={{state}}',
+      processData: false,
+      data: authResult['code'],
+      contentType: 'application/octet-stream; charset=utf-8',
+      success: function(result) {
+        // Handle or verify the server response if necessary.
+        if (result) {
+          $('#result').text('Login Successful!. Redirecting...')
+          setTimeout(function() {
+            window.location.href = "/";
+          }, 2000);
+        } else if (authResult['error']) {
+          console.log('There was an error: ' + authResult['error']);
+        } else {
+          $('#result').text('Failed to make a server-side call. Check your configuration and console.');
+        }
+      }
+    });
+  }
+}
+</script>
 
 {% endblock %}

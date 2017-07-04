@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+Oops!
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="row subtitle">
+  <div class="col-12">
+    <h1 class="error">¯\_(ツ)_/¯</h1>
+    <p>{{ error }}</p>
+    {% if referrer %}
+      <a href="{{ referrer }}" class="btn btn-secondary">
+        {% if button_title %}
+          {{ button_title }}
+        {% else %}
+          Back
+        {% endif %}
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

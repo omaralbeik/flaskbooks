@@ -21,14 +21,18 @@
       <p>by <a target="_blank" href="https://www.google.com/?q={{ book.author_name }}">{{ book.author_name }}</a></p>
       {% endif %}
 
-      {% if is_liked %}
-      <form action="{{ url_for('dislikeBook', book_id=book.id) }}" method="post">
-        <input class="btn btn-primary" type="submit" name="" value="Dislike {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
-      </form>
+      {% if current_user %}
+        {% if is_liked %}
+        <form action="{{ url_for('dislikeBook', book_id=book.id) }}" method="post">
+          <input class="btn btn-primary" type="submit" name="" value="Dislike {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
+        </form>
+        {% else %}
+        <form action="{{ url_for('likeBook', book_id=book.id) }}" method="post">
+          <input class="btn btn-secondary" type="submit" name="" value="Like {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
+        </form>
+        {% endif %}
       {% else %}
-      <form action="{{ url_for('likeBook', book_id=book.id) }}" method="post">
-        <input class="btn btn-secondary" type="submit" name="" value="Like {% if book.likes|length > 0 %}({{ book.likes|length }}){% endif %}">
-      </form>
+      <a href="{{ url_for('auth') }}" class="btn btn-primary">Sign in to Like</a>
       {% endif %}
 
       <p>{{ book.description or '' }}</p>
@@ -55,9 +59,12 @@
         <a href="{{ url_for('user', user_id=book.owner_id) }}">{{ book.owner.name_or_email }}</a>
       </p>
       <br>
-      <a href="{{ url_for('editBook', book_id=book.id) }}" class="btn btn-primary">Edit Book</a>
-      <a href="{{ url_for('deleteBook', book_id=book.id) }}" class="btn btn-danger">Delete Book</a>
-
+      {% if current_user %}
+      {% if book.owner_id == current_user.id %}
+        <a href="{{ url_for('editBook', book_id=book.id) }}" class="btn btn-primary">Edit Book</a>
+        <a href="{{ url_for('deleteBook', book_id=book.id) }}" class="btn btn-danger">Delete Book</a>
+      {% endif %}
+      {% endif %}
     </div>
   </div>
 </div>

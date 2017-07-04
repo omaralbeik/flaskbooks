@@ -12,7 +12,11 @@ Books
 <div class="row subtitle">
   <div class="col-10">
     <h1>Books</h1>
+    {% if current_user %}
     <a href="{{ url_for('newBook') }}">Add New</a>
+    {% else %}
+    <a href="{{ url_for('auth') }}">Sign in to add your books!</a>
+    {% endif %}
   </div>
 </div>
 <ul class="list-unstyled">

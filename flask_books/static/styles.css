@@ -6,6 +6,8 @@ html {
 body {
   /* Margin bottom by footer height */
   margin-bottom: 150px;
+  min-height: 75rem;
+  padding-top: 4.5rem;
 }
 
 .footer {
@@ -55,4 +57,17 @@ form {
   padding-bottom: 30px;
   background-color: #f3f3f3;
   border-radius: 5px;
+}
+
+.social-login {
+  padding-top: 30px;
+  padding-left: 30px;
+  padding-bottom: 30px;
+  background-color: #f3f3f3;
+  border-radius: 5px;
+  margin-bottom: 30px;
+}
+
+.error {
+  font-size: 300%;
 }
