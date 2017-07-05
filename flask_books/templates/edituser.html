@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Update user
+{% endblock %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<div class="row subtitle">
+  <div class="col-10">
+    <h1>{{ user.name_or_email }}</h1>
+  </div>
+</div>
+
+<form action="{{ url_for('editUser', user_id=user.id) }}" method="post">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="{{ user.name }}">
+  </div>
+  <div class="form-group">
+    <label for="picture_url">Picture URL</label>
+    <input type="text" class="form-control" name="picture_url" id="picture_url" placeholder="website.com/picture.jpg" value="{{ user.picture_url }}">
+  </div>
+  <div class="form-group">
+    <label for="bio">Bio</label>
+    <textarea maxlength="250" class="form-control" name="bio" id="bio" rows="3">{{ user.bio or '' }}</textarea>
+  </div>
+    <input type="submit" class="btn btn-primary" value="Update">
+    <a href="{{ url_for('user', user_id=user.id) }}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

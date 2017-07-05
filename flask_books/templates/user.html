@@ -12,27 +12,22 @@
 
 <div class="row subtitle">
   <div class="col-10">
-    {% if user.picture_url %}
-    <img class="rounded-circle profile-picture" src="{{ user.picture_url }}" alt="{{ user.name_or_email }}">
-    {% endif %}
+    <img class="rounded-circle profile-picture" src="{{ user.picture_url_or_placeholder }}" alt="{{ user.name_or_email }}">
+
     <h1>{{ user.name_or_email }}</h1>
+    {% if user.bio %}
+    <p>{{ user.bio }}</p>
+    {% endif %}
     {% if user.email %}
+    Email:
     <a href="mailto:{{user.email}}">{{ user.email }}</a>
     {% endif %}
     <p>Member since {{ user.date_joined.date() }}</p>
+    {% if current_user.id == user.id %}
+    <a href="{{ url_for('editUser', user_id=user.id ) }}" class="btn btn-primary">Update Info</a>
+    {% endif %}
   </div>
 </div>
-
-{% if user.genres|length > 0 %}
-<h2>Genres</h2>
-<ul class="list-unstyled">
-  {% for g in user.genres %}
-  <li>
-    <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }}</a>
-  </li>
-  {% endfor %}
-</ul>
-{% endif %}
 
 {% if user.books|length > 0 %}
 <h2>Books</h2>

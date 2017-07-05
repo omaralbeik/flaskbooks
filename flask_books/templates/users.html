@@ -19,7 +19,7 @@ Users
 <ul class="list-unstyled">
   {% for u in users %}
   <li>
-    <a href="{{ url_for('user', user_id=u.id) }}">{{ u.name_or_email }}</a>
+    <a href="{{ url_for('user', user_id=u.id) }}"><img class="rounded-circle profile-picture-thumb" src="{{ u.picture_url_or_placeholder }}" alt="">{{ u.name_or_email }}</a>
   </li>
   {% endfor %}
 </ul>

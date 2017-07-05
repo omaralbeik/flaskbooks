@@ -40,11 +40,11 @@
 
       {% if book.genres|length > 0 %}
       <p>Genres</p>
-      {% for g in book.genres %}
-      <ul>
-        <a href="{{ url_for('genre', genre_id=g.id) }}">{{ g.name }}</a>
-      </ul>
-      {% endfor %}
+      <div class="book-genres">
+        {% for g in book.genres %}
+        <a href="{{ url_for('genre', genre_id=g.id) }}"><span class="badge badge-pill badge-default genre-badge">{{ g.name }}</span></a>
+        {% endfor %}
+      </div>
       {% endif %}
 
       {% if book.year %}

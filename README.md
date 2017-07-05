@@ -22,8 +22,9 @@ A very light social network for sharing books built using Flask
   - `/genre/genre_id/edit`: Edit genre.
   - `/genre/genre_id/delete`: Delete genre.
   - `/users`: All users.
-  - `/genre/user_id`: User page.  
-  - `/auth`: User page.
+  - `/user/user_id`: User page.
+  - `/user/user_id/edit`: Update user info.  
+  - `/auth`: Login page.
 
 ### RESTful Endpoints
 - `/books/JSON`: All books JSON.
@@ -31,7 +32,7 @@ A very light social network for sharing books built using Flask
 - `/genres/JSON`: All genres JSON.
 - `/genre/genre_id/JSON`: Genre JSON.
 - `/users/JSON`: All users JSON.
-- `/genre/user_id/JSON`: User JSON.  
+- `/user/user_id/JSON`: User JSON.  
 
 
 ## How to Run

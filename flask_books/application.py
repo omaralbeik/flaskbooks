@@ -266,6 +266,31 @@ def user(user_id):
         return h.render_user_not_found()
     return h.render_user(user_id)
 
+# show user
+@app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
+def editUser(user_id):
+    if not dbh.get_user_by_id(user_id):
+        return h.render_user_not_found()
+    if not dbh.get_user_by_id(user_id):
+        return h.render_user_not_found()
+    current_user_id = dbh.get_current_user_id()
+    if user_id != current_user_id:
+        return h.render_not_authorized()
+
+    if request.method == 'GET':
+        return h.render_edit_user(user_id)
+
+    if request.method == 'POST':
+        name = request.form['name']
+        picture_url = request.form['picture_url']
+        bio = request.form['bio']
+        user = dbh.update_current_user_info(name=name,
+                                            picture_url=picture_url,
+                                            bio=bio)
+        if genre:
+            flash("User info updated!", 'success')
+            return h.redirect_user(user_id)
+
 
 # show auth
 @app.route('/auth/')

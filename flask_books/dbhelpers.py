@@ -15,10 +15,10 @@ session = DBSession()
 
 ###########################  User Helper Functions  ############################
 
-def create_user(email, name, picture_url):
+def create_user(email, name, picture_url, bio):
     if get_user_by_email(email):
         return False
-    user = User(email=email, name=name, picture_url=picture_url)
+    user = User(email=email, name=name, picture_url=picture_url, bio=bio)
     session.add(user)
     session.commit()
     return user
@@ -65,6 +65,24 @@ def get_current_user_id():
     return user.id if user else None
 
 
+def update_current_user_info(**kwargs):
+    user = get_current_user()
+    if not user:
+        return False
+    name = kwargs.get('name')
+    bio = kwargs.get('bio')
+    picture_url = kwargs.get('picture_url')
+    if name:
+        user.name = name
+    if bio:
+        user.bio = bio
+    if picture_url:
+        user.picture_url = picture_url
+    session.add(user)
+    session.commit()
+    return user
+
+
 def update_current_user_info_from_login_session():
     name = login_session['name']
     email = login_session['email']
@@ -97,6 +115,7 @@ def delete_current_user():
     session.delete(user)
     session.commit()
     return True
+
 
 
 ###########################  Book Helper Functions  ############################

@@ -126,6 +126,11 @@ def render_user(user_id, **kwargs):
                            selected='users',
                            **kwargs)
 
+def render_edit_user(user_id, **kwargs):
+    return render_template('edituser.html',
+                           user=dbh.get_user_by_id(user_id),
+                           current_user=dbh.get_current_user(),
+                           **kwargs)
 
 def render_auth(**kwargs):
     return render_template('auth.html',

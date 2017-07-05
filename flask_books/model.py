@@ -21,7 +21,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False)
-    name = Column(String(250), nullable=False)
+    name = Column(String(250), nullable=True)
+    bio = Column(String(250), nullable=True)
     picture_url = Column(String(250), nullable=True)
     date_joined = Column(DateTime, default=datetime.datetime.utcnow)
 
@@ -40,6 +41,8 @@ class User(Base):
             info_dict['name'] = self.name
         if self.picture_url:
             info_dict['picture_url'] = self.picture_url
+        if self.bio:
+            info_dict['bio'] = self.bio
 
         books_ids = [b.id for b in self.books]
         genres_ids = [g.id for g in self.genres]
@@ -56,6 +59,13 @@ class User(Base):
     @property
     def name_or_email(self):
         return self.name if self.name else self.email
+
+    @property
+    def picture_url_or_placeholder(self):
+        if self.picture_url:
+            return self.picture_url
+        else:
+            return url_for('static', filename='images/placeholder_user.jpg')
 
 
 

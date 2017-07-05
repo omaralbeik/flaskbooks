@@ -10,6 +10,10 @@ body {
   padding-top: 4.5rem;
 }
 
+h2 {
+  margin-top: 50px;
+}
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -84,4 +88,29 @@ form {
   max-height: 150px;
   margin-right: 50px;
   margin-bottom: 20px;
+}
+
+.profile-picture-thumb {
+  max-width: 50px;
+  max-height: 50px;
+  margin-right: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.book-genres {
+  margin-bottom: 16px;
+}
+
+.genre-badge {
+  padding: 8px;
+  padding-left: 14px;
+  padding-right: 14px;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-weight: normal;
+  background-color: white;
+  color: black;
+  border: 1px solid gray;
 }
