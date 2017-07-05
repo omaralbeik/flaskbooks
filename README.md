@@ -43,9 +43,7 @@ Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.
 3. Select "API's and Auth -> Credentials -> Create a new OAuth client ID" from the project menu
 4. Select Web Application
 5. On the consent screen, type in a product name and save.
-6. In Authorized javascript origins add:
-    http://0.0.0.0:5000
-    http://localhost:5000
+6. In Authorized javascript origins add: http://0.0.0.0:5000 and http://localhost:5000
 7. Click create client ID
 8. Click download JSON and save it into the root director of this project.
 9. Rename the JSON file "client_secret.json"
@@ -60,9 +58,7 @@ Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.
 7. type `python application.py` to start the server.
 
 ### Open in your browser
-Now you can open in a webpage by going to either:
-    http://0.0.0.0:5000
-    http://localhost:5000
+Now you can open in a webpage by going to either: http://0.0.0.0:5000 or http://localhost:5000
 
 
 ## Project Structure
