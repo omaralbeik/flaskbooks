@@ -1,8 +1,6 @@
-import random, string
-from flask import render_template, redirect, url_for
-import json
-from flask import make_response, jsonify
+import random, string, json
 
+from flask import render_template, redirect, make_response, url_for
 
 from application import login_session
 import dbhelpers as dbh

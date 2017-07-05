@@ -1,15 +1,7 @@
-import httplib2
-import requests
-import json
+import httplib2, requests, json
 
 from flask import Flask, request, flash, jsonify, url_for
 from flask import session as login_session
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from model import Base, User, Book, Genre, Like, db_name
-from errors import HTMLError
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 
 import helpers as h
@@ -17,8 +9,7 @@ import dbhelpers as dbh
 
 app = Flask(__name__)
 
-CLIENT_ID = json.loads(open('client_secrets.json', 'r')
-                .read())['web']['client_id']
+CLIENT_ID = json.load(open('client_secrets.json', 'r'))['web']['client_id']
 
 
 
@@ -59,7 +50,7 @@ def newBook():
         year = request.form['year'] or None
 
         if not name:
-            flash(HTMLError.noBookName, 'danger')
+            flash('Please enter book name and try again.', 'danger')
             return h.render_new_book(name=name,
                                      description=description,
                                      cover_image_url=cover_image_url,
@@ -104,7 +95,7 @@ def editBook(book_id):
         year = request.form['year'] or None
 
         if not name:
-            flash(HTMLError.noBookName, 'danger')
+            flash('Please enter book name and try again.', 'danger')
             return h.render_edit_book(book_id)
 
         book = dbh.update_book(book_id,
@@ -201,7 +192,7 @@ def newGenre():
         name = request.form['name']
 
         if not name:
-            flash(HTMLError.noGenreName, 'danger')
+            flash('Please enter genre name and try again.', 'danger')
             return h.render_new_genre()
 
         if dbh.get_genre_by_name(name):
@@ -231,7 +222,7 @@ def editGenre(genre_id):
     if request.method == 'POST':
         name = request.form['name']
         if not name:
-            flash(HTMLError.noGenreName, 'danger')
+            flash('Please enter genre name and try again.', 'danger')
             return h.render_new_genre()
 
         if dbh.get_genre_by_name(name):
