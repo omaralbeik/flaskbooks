@@ -54,7 +54,7 @@ Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.
 ### Setup the Database & Start the Server
 1. In the root directory, use the command `vagrant up`, this will install the vagrant machine.
 2. Once it's complete, type `vagrant ssh` to login to the VM.
-3. In the vm, cd /vagrant/flask-books
+3. In the vm, `cd /vagrant/flask-books`
 5. type `python database_setup.py` this will create the empty database.
 6. type `python lots_of_books.py` this will fill the database with some pre-entered books and users.
 7. type `python application.py` to start the server.
