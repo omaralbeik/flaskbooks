@@ -9,44 +9,47 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from model import Base, User, Book, Genre, Like, db_name
-from helpers import *
 from errors import HTMLError
 from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 
+import helpers as h
+import dbhelpers as dbh
 
 app = Flask(__name__)
 
+CLIENT_ID = json.loads(open('client_secrets.json', 'r')
+                .read())['web']['client_id']
 
-################################################################################
-###                              HTML Endpoints                              ###
-################################################################################
+
+
+###############################  HTML Endpoints  ###############################
 
 # Show all books
 @app.route('/')
 @app.route('/books/')
 def books():
-    return render_books(login_session)
+    return h.render_books()
 
 
 # Show book info
 @app.route('/book/<int:book_id>')
 def book(book_id):
-    return render_book(book_id, login_session)
+    if not dbh.get_book_by_id(book_id):
+        return h.render_book_not_found()
+    return h.render_book(book_id)
 
 
 # Add a new book
 @app.route('/books/new/', methods=['GET', 'POST'])
 def newBook():
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        h.render_not_authenticated()
+
     if request.method == 'GET':
-        return render_new_book(login_session)
+        return h.render_new_book()
 
     if request.method == 'POST':
-
-        current_user_id = get_user_id_from_session(login_session)
-        if not current_user_id:
-            flash(HTMLError.notSignedIn, 'danger')
-            return redirect_books(login_session)
-
         name = request.form['name'] or None
         description = request.form['description'] or None
         genres_ids = request.form.getlist('genres') or []
@@ -57,48 +60,41 @@ def newBook():
 
         if not name:
             flash(HTMLError.noBookName, 'danger')
-            return render_new_book(login_session,
-                                   name=name,
-                                   description=description,
-                                   cover_image_url=cover_image_url,
-                                   page_count=page_count,
-                                   author_name=author_name,
-                                   year=year)
+            return h.render_new_book(name=name,
+                                     description=description,
+                                     cover_image_url=cover_image_url,
+                                     page_count=page_count,
+                                     author_name=author_name,
+                                     year=year)
 
-        book = Book(name=name, owner_id=current_user_id)
+        book = dbh.create_book(name=name,
+                               description=description,
+                               genres_ids=genres_ids,
+                               cover_image_url=cover_image_url,
+                               page_count=page_count,
+                               author_name=author_name,
+                               year=year)
 
-        book.description = description
-        book.cover_image_url = cover_image_url
-        book.page_count = page_count
-        book.author_name = author_name
-        book.year = year
+        if book:
+            flash('Book Added!', 'success')
+            return h.redirect_books()
 
-        genres = []
-        for id in genres_ids:
-            g = get_genre_by_id(id)
-            if g:
-                genres.append(g)
-
-        book.genres = genres
-
-        session.add(book)
-        session.commit()
-
-        return redirect_books()
 
 # Edit book
 @app.route('/book/<int:book_id>/edit/', methods=['GET', 'POST'])
 def editBook(book_id):
-    book = get_book_by_id(book_id)
-    current_user_id = get_user_id_from_session(login_session)
+    if not dbh.get_book_by_id(book_id):
+        return h.render_book_not_found()
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+    if dbh.get_book_by_id(book_id).owner_id != current_user_id:
+        return h.render_not_authorized()
 
     if request.method == 'GET':
-        return render_edit_book(book_id, login_session)
+        return h.render_edit_book(book_id)
 
     if request.method == 'POST':
-        if book.owner_id != current_user_id:
-            return redirect_book(book_id, login_session)
-
         name = request.form['name'] or None
         description = request.form['description'] or None
         genres_ids = request.form.getlist('genres') or []
@@ -109,194 +105,199 @@ def editBook(book_id):
 
         if not name:
             flash(HTMLError.noBookName, 'danger')
-            return render_edit_book(book_id, login_session)
+            return h.render_edit_book(book_id)
 
-        book = get_book_by_id(book_id)
+        book = dbh.update_book(book_id,
+                               name=name,
+                               description=description,
+                               genres_ids=genres_ids,
+                               cover_image_url=cover_image_url,
+                               page_count=page_count,
+                               author_name=author_name,
+                               year=year)
 
-        book.name = name
-        book.description = description
-        book.cover_image_url = cover_image_url
-        book.page_count = page_count
-        book.author_name = author_name
-        book.year = year
+        if book:
+            flash('Book Updated!', 'success')
+            return h.redirect_book(book_id)
 
-        genres = []
-        for id in genres_ids:
-            g = get_genre_by_id(id)
-            if g:
-                genres.append(g)
-
-        book.genres = []
-        book.genres = genres
-
-        session.add(book)
-        session.commit()
-
-        return redirect_book(book_id)
 
 # Delete book
 @app.route('/book/<int:book_id>/delete/', methods=['GET', 'POST'])
 def deleteBook(book_id):
-    if request.method == 'GET':
-        return render_delete_book(book_id, login_session)
-    if request.method == 'POST':
-        book = get_book_by_id(book_id)
-        current_user_id = get_user_id_from_session(login_session)
-        if book.owner_id != current_user_id:
-            return redirect_book(book_id, login_session)
+    if not dbh.get_book_by_id(book_id):
+        return h.render_book_not_found()
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+    if dbh.get_book_by_id(book_id).owner_id != current_user_id:
+        return h.render_not_authorized()
 
-        session.delete(book)
-        session.commit()
-        flash("Book deleted!", 'success')
-        return redirect_books()
+    if request.method == 'GET':
+        return h.render_delete_book(book_id)
+
+    if request.method == 'POST':
+        dbh.delete_book(book_id)
+        flash('Book Deleted!', 'success')
+        return h.redirect_books()
+
 
 
 # Like a book
 @app.route('/book/<int:book_id>/like/', methods=['GET', 'POST'])
 def likeBook(book_id):
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
 
     if request.method == 'GET':
-        return render_book(book_id, login_session)
+        return h.render_book(book_id)
 
     if request.method == 'POST':
-        current_user_id = get_user_id_from_session(login_session)
-        if not current_user_id:
-            return redirect_book(book_id, login_session)
-
-        if validate_book(book_id):
-            return redirect_book(book_id, login_session)
-
-        like = get_like(book_id, current_user_id)
-
-        if not like:
-            like = Like(book_id=book_id, user_id=current_user_id)
-            session.add(like)
-            session.commit()
-
-        return redirect_book(book_id)
+        like = dbh.like_book(book_id)
+        if like:
+            return h.redirect_book(book_id)
 
 
 # Dislike a book
 @app.route('/book/<int:book_id>/dislike/', methods=['GET', 'POST'])
 def dislikeBook(book_id):
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+
     if request.method == 'GET':
-        return render_book(book_id, login_session)
+        return h.render_book(book_id)
 
     if request.method == 'POST':
-        current_user_id = get_user_id_from_session(login_session)
-        if not current_user_id:
-            return redirect_book(book_id)
-
-        like = get_like(book_id, current_user_id)
-        if like:
-            session.delete(like)
-            session.commit()
-
-        return redirect_book(book_id)
+        like = dbh.dislike_book(book_id)
+        return h.redirect_book(book_id)
 
 
 # Show all genres
 @app.route('/genres/')
 def genres():
-    return render_genres(login_session)
+    return h.render_genres()
+
 
 # Show genre
 @app.route('/genre/<int:genre_id>/')
 def genre(genre_id):
-    return render_genre(genre_id, login_session)
+    if not dbh.get_genre_by_id(genre_id):
+        return h.render_genre_not_found()
+    return h.render_genre(genre_id)
+
 
 # Show new genre
 @app.route('/genres/new/', methods=['GET', 'POST'])
 def newGenre():
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+
     if request.method == 'GET':
-        return render_new_genre(login_session)
+        return h.render_new_genre()
 
     if request.method == 'POST':
         name = request.form['name']
 
         if not name:
             flash(HTMLError.noGenreName, 'danger')
-            return render_new_genre(login_session)
+            return h.render_new_genre()
 
-        genre = get_genre_by_name(name)
+        if dbh.get_genre_by_name(name):
+            flash("Genre exist, try another name!", 'danger')
+            return h.render_new_genre()
+
+        genre = dbh.create_genre(name)
         if genre:
-            flash(HTMLError.genreExists, 'danger')
-            return render_new_genre(login_session)
+            flash("Genre created!", 'success')
+            return h.redirect_genres()
 
-        genre = Genre(name=name, owner_id=get_user_id_from_session(login_session))
-        session.add(genre)
-        session.commit()
-        flash("Genre created!", 'success')
-        return redirect_genres()
 
 # Show edit genre
 @app.route('/genre/<int:genre_id>/edit/', methods=['GET', 'POST'])
 def editGenre(genre_id):
+    if not dbh.get_genre_by_id(genre_id):
+        return h.render_genre_not_found()
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+    if dbh.get_genre_by_id(genre_id).owner_id != current_user_id:
+        return h.render_not_authorized()
 
     if request.method == 'GET':
-        return render_edit_genre(genre_id, login_session)
+        return h.render_edit_genre(genre_id)
 
     if request.method == 'POST':
-        current_user_id = get_user_id_from_session(login_session)
-        if book.owner_id != current_user_id:
-            return redirect_book(book_id, login_session)
-
         name = request.form['name']
-
         if not name:
-            flash(HTMLError.noBookName, 'danger')
-            return render_new_genre(login_session)
+            flash(HTMLError.noGenreName, 'danger')
+            return h.render_new_genre()
 
-        genre = get_genre_by_id(genre_id)
-        genre.name = name
-        session.commit()
-        flash("Genre updated!", 'success')
-        return redirect_genres()
+        if dbh.get_genre_by_name(name):
+            flash("Genre exist, try another name!", 'danger')
+            return h.render_new_genre()
+
+        genre = dbh.create_genre(name)
+        if genre:
+            flash("Genre updated!", 'success')
+            return h.redirect_genre(genre_id)
 
 
 # Delete genre
 @app.route('/genre/<int:genre_id>/delete/', methods=['GET', 'POST'])
 def deleteGenre(genre_id):
+    if not dbh.get_genre_by_id(genre_id):
+        return h.render_genre_not_found()
+    current_user_id = dbh.get_current_user_id()
+    if not current_user_id:
+        return h.render_not_authenticated()
+    if dbh.get_genre_by_id(genre_id).owner_id != current_user_id:
+        return h.render_not_authorized()
+
     if request.method == 'GET':
-        return render_delete_genre(genre_id, login_session)
+        return h.render_delete_genre(genre_id)
 
     if request.method == 'POST':
-        genre = get_genre_by_id(genre_id)
-        session.delete(genre)
-        session.commit()
+        dbh.delete_genre(genre_id)
         flash("Genre deleted!", 'success')
-        return redirect_genres()
 
 
 # show all users
 @app.route('/users/')
 def users():
-    return render_users(login_session)
+    return h.render_users()
 
 # show user
 @app.route('/user/<int:user_id>/')
 def user(user_id):
-    return render_user(user_id, login_session)
+    if not dbh.get_user_by_id(user_id):
+        return h.render_user_not_found()
+    return h.render_user(user_id)
 
 
 # show auth
 @app.route('/auth/')
 def auth():
-    state = generate_auth_state()
+    state = h.generate_auth_state()
     login_session['state'] = state
-    return render_auth(login_session, state=state)
+    return h.render_auth(state=state)
 
 
-################################################################################
-###                               Google Auth                                ###
-################################################################################
+@app.errorhandler(404)
+def showError(e):
+  return h.render_not_found(), 404
+
+
+
+################################  Google Auth  #################################
 
 @app.route('/gconnect', methods=['POST'])
 def gConnect():
 
     # Validate state token
     if request.args.get('state') != login_session['state']:
-        return json_response('Invalid state parameter.', 401)
+        return h.json_response('Invalid state parameter.', 401)
 
     # Obtain authorization code
     code = request.data
@@ -308,36 +309,35 @@ def gConnect():
         credentials = oaht_flow.step2_exchange(code)
 
     except FlowExchangeError:
-        return json_response('Failed to upgrade the authorization code.', 401)
+        return h.json_response('Failed to upgrade the authorization code.', 401)
 
     # Check that the access token is valid
     access_token = credentials.access_token
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            %access_token)
-    h = httplib2.Http()
-    result = json.loads(h.request(url, 'GET')[1])
+    http = httplib2.Http()
+    result = json.loads(http.request(url, 'GET')[1])
 
     # If there was an error in the access token info, abort.
     error = result.get('error')
     if error:
-        return json_response(error, 500)
+        return h.json_response(error, 500)
 
     gplus_id = credentials.id_token['sub']
 
     # Verify that the access token is used for the intended user.
     if result['user_id'] != gplus_id:
-        return json_response("Token's user ID doesn't match given user ID.", 401)
+        return h.json_response("Token's user ID doesn't match given user ID.", 401)
 
     # Verify that the access token is valid for this app.
     if result['issued_to'] != CLIENT_ID:
-        return json_response("Token's client ID does not match app's.", 401)
-
+        return h.json_response("Token's client ID does not match app's.", 401)
 
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
 
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        return json_response('Current user is already connected.', 200)
+        return h.json_response('Current user is already connected.', 200)
 
     # Get user info
     userinfo_url = "https://www.googleapis.com/oauth2/v1/userinfo"
@@ -347,28 +347,30 @@ def gConnect():
     data = answer.json()
 
     # Store the access token and user data in the session for later use.
-    save_user_info(login_session, credentials, data)
-    update_user_info_from_session(login_session)
-    return redirect_books()
+    h.save_current_user_info(credentials, data)
+
+    user = dbh.create_or_update_current_user_from_login_session()
+    if user:
+        return h.redirect_books()
 
 
 @app.route('/gdisconnect')
 def gDisconnect():
     access_token = login_session.get('access_token')
     if not access_token:
-        return json_response('Current user is not connected.', 401)
+        return h.json_response('Current user is not connected.', 401)
 
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' %access_token
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[0]
+    http = httplib2.Http()
+    result = http.request(url, 'GET')[0]
 
     if result['status'] == '200':
-        clear_user_info(login_session)
-    	return redirect_books()
+        h.clear_login_session()
+    	return h.redirect_books()
 
     else:
-        login_session.clear()
-    	return json_response('Failed to revoke token for given user.', 400)
+        h.clear_login_session()
+    	return h.json_response('Failed to revoke token for given user.', 400)
 
 
 
@@ -379,58 +381,51 @@ def gDisconnect():
 # List all Books
 @app.route('/books/JSON')
 def booksJSON():
-    books = session.query(Book).all()
-    return jsonify(books=[b.serialize for b in books])
+    return jsonify(books=[b.serialize for b in dbh.get_all_books()])
 
 
 # List Book info
 @app.route('/book/<int:book_id>/JSON')
 def bookJSON(book_id):
-    error = validate_book(book_id)
-    if error:
-        return jsonify(error=error)
-    book = session.query(Book).filter_by(id=book_id).one()
-    return jsonify(book.serialize)
+    book = dbh.get_book_by_id(book_id)
+    if not book:
+        return h.json_response("Book doesn't exist", 404)
+    return jsonify(dbh.get_book_by_id(book_id).serialize)
 
 
 # List all Genres
 @app.route('/genres/JSON')
 def genresJSON():
-    genres = session.query(Genre).all()
-    return jsonify(genres=[c.serialize for c in genres])
+    return jsonify(genres=[g.serialize for g in dbh.get_all_genres()])
 
 
 # List Genres books
 @app.route('/genre/<int:genre_id>/JSON')
 def genreJSON(genre_id):
-    error = validate_genre(genre_id)
-    if error:
-        return jsonify(error=error)
-    genre = session.query(Genre).filter_by(id=genre_id).one()
+    genre = dbh.get_genre_by_id(genre_id)
+    if not genre:
+        return h.json_response("Genre doesn't exist", 404)
     return jsonify(genre.serialize)
 
 
 # List all Users
 @app.route('/users/JSON')
 def usersJSON():
-    users = session.query(User).all()
-    return jsonify(Users=[u.serialize for u in users])
+    return jsonify(Users=[u.serialize for u in dbh.get_all_users()])
 
 
 # List user info
 @app.route('/user/<int:user_id>/JSON')
 def userJSON(user_id):
-    error = validate_user(user_id)
-    if error:
-        return jsonify(error=error)
-
-    user = session.query(User).filter_by(id=user_id).one()
+    user = dbh.get_user_by_id(user_id)
+    if not user:
+        return h.json_response("User doesn't exist", 404)
     return jsonify(user.serialize)
-
 
 
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
+    app.register_error_handler(404, showError)
     app.debug = True
     app.run(host='0.0.0.0', port=5000)

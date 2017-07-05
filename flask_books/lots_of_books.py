@@ -52,7 +52,7 @@ book2 = Book(name="The Handmaid's Tale",
              cover_image_url="https://images.gr-assets.com/books/1498057733l/38447.jpg",
              author_name="Margaret Atwood",
              year=1985,
-             owner_id=2)
+             owner_id=1)
 
 book2.genres.append(genre4)
 book2.genres.append(genre5)
@@ -63,7 +63,7 @@ book3 = Book(name="Ender's Game",
              page_count = 420,
              author_name="Orson Scott Card",
              year=1985,
-             owner_id=3)
+             owner_id=2)
 
 book3.genres.append(genre4)
 book3.genres.append(genre3)
@@ -86,7 +86,7 @@ book5 = Book(name="Elon Musk: Tesla, SpaceX, and the Quest for a Fantastic Futur
              page_count = 400,
              author_name="Ashlee Vance",
              year=2015,
-             owner_id=2)
+             owner_id=1)
 
 book6 = Book(name="And Then There Were None",
              cover_image_url="https://images.gr-assets.com/books/1391120695l/16299.jpg",
