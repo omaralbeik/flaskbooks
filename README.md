@@ -15,7 +15,7 @@ A very light social network for sharing books built using Flask
   - `/books/new`: Create a new book.
   - `/book/book_id`: Book page.
   - `/book/book_id/edit`: Edit book.
-  - `/book/book_id/edit`: Delete book.
+  - `/book/book_id/delete`: Delete book.
   - `/genres`: All genres.
   - `/genres/new`: Create a new genre.
   - `/genre/genre_id`: Genre page.
