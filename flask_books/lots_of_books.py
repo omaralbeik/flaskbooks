@@ -14,7 +14,7 @@ session.query(Book).delete()
 session.commit()
 
 users = [
-    User(name="Omar Albeik", email="omaralbeik@gmail.com", bio="I\’m a passionate software developer, AI enthusiast and lifelong learner!"),
+    User(name="Omar Albeik", email="omaralbeik@gmail.com", bio="A passionate software developer, AI enthusiast and lifelong learner."),
     User(name="Jane Doe", email="jane.doe@gmail.com"),
     User(name="John Applesead", email="john.applesead@apple.com")
 ]
