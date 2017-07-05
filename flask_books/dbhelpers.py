@@ -193,6 +193,8 @@ def delete_book(book_id):
         return False
     if book.owner_id != owner_id:
         return False
+    for l in book.likes:
+        session.delete(l)
     session.delete(book)
     session.commit()
     return True

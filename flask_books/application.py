@@ -44,7 +44,7 @@ def book(book_id):
 def newBook():
     current_user_id = dbh.get_current_user_id()
     if not current_user_id:
-        h.render_not_authenticated()
+        return h.render_not_authenticated()
 
     if request.method == 'GET':
         return h.render_new_book()
@@ -281,7 +281,7 @@ def user(user_id):
 def auth():
     state = h.generate_auth_state()
     login_session['state'] = state
-    return h.render_auth(state=state)
+    return h.render_auth(state=state, CLIENT_ID=CLIENT_ID)
 
 
 @app.errorhandler(404)

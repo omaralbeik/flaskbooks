@@ -12,6 +12,9 @@
 
 <div class="row subtitle">
   <div class="col-10">
+    {% if user.picture_url %}
+    <img class="rounded-circle profile-picture" src="{{ user.picture_url }}" alt="{{ user.name_or_email }}">
+    {% endif %}
     <h1>{{ user.name_or_email }}</h1>
     {% if user.email %}
     <a href="mailto:{{user.email}}">{{ user.email }}</a>
@@ -44,7 +47,7 @@
 <h2>Liked Books</h2>
 <ul class="list-unstyled">
   {% for l in user.likes %}
-  <a href="{{ url_for('book', book_id=l.book_id) }}"><img class="book-img rounded" src="{{ l.book.cover_or_placeholder_url }}" alt="{{ l.book.name }}"></a>
+  <a href="{{ url_for('book', book_id=l.book_id) }}"><img class="like-img rounded" src="{{ l.book.cover_or_placeholder_url }}" alt="{{ l.book.name }}"></a>
   {% endfor %}
 </ul>
 {% endif %}

@@ -27,6 +27,13 @@ body {
   margin-bottom: 20px;
 }
 
+.like-img {
+  width: 10rem;
+  height: 15rem;
+  margin-right: 10px;
+  margin-bottom: 10px;
+}
+
 .container-info {
   margin-top: 30px;
 }
@@ -70,4 +77,11 @@ form {
 
 .error {
   font-size: 300%;
+}
+
+.profile-picture {
+  max-width: 150px;
+  max-height: 150px;
+  margin-right: 50px;
+  margin-bottom: 20px;
 }
