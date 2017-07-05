@@ -68,7 +68,7 @@ def newBook():
 
         if book:
             flash('Book Added!', 'success')
-            return h.redirect_books()
+        return h.redirect_books()
 
 
 # Edit book
@@ -109,7 +109,7 @@ def editBook(book_id):
 
         if book:
             flash('Book Updated!', 'success')
-            return h.redirect_book(book_id)
+        return h.redirect_book(book_id)
 
 
 # Delete book
@@ -145,8 +145,7 @@ def likeBook(book_id):
 
     if request.method == 'POST':
         like = dbh.like_book(book_id)
-        if like:
-            return h.redirect_book(book_id)
+        return h.redirect_book(book_id)
 
 
 # Dislike a book
@@ -202,7 +201,7 @@ def newGenre():
         genre = dbh.create_genre(name)
         if genre:
             flash("Genre created!", 'success')
-            return h.redirect_genres()
+        return h.redirect_genres()
 
 
 # Show edit genre
@@ -229,10 +228,10 @@ def editGenre(genre_id):
             flash("Genre exist, try another name!", 'danger')
             return h.render_new_genre()
 
-        genre = dbh.create_genre(name)
+        genre = dbh.edit_genre(genre_id, name)
         if genre:
             flash("Genre updated!", 'success')
-            return h.redirect_genre(genre_id)
+        return h.redirect_genre(genre_id)
 
 
 # Delete genre
@@ -252,6 +251,7 @@ def deleteGenre(genre_id):
     if request.method == 'POST':
         dbh.delete_genre(genre_id)
         flash("Genre deleted!", 'success')
+    return h.redirect_genres()
 
 
 # show all users
@@ -287,9 +287,9 @@ def editUser(user_id):
         user = dbh.update_current_user_info(name=name,
                                             picture_url=picture_url,
                                             bio=bio)
-        if genre:
+        if user:
             flash("User info updated!", 'success')
-            return h.redirect_user(user_id)
+        return h.redirect_user(user_id)
 
 
 # show auth
