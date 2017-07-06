@@ -6,11 +6,11 @@ from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 
 import helpers as h
 import dbhelpers as dbh
+import decorators as d
 
 app = Flask(__name__)
 
 CLIENT_ID = json.load(open('client_secrets.json', 'r'))['web']['client_id']
-
 
 
 ###############################  HTML Endpoints  ###############################
@@ -24,19 +24,15 @@ def books():
 
 # Show book info
 @app.route('/book/<int:book_id>')
+@d.if_book_available('book_id')
 def book(book_id):
-    if not dbh.get_book_by_id(book_id):
-        return h.render_book_not_found()
     return h.render_book(book_id)
 
 
 # Add a new book
+@d.require_authentication
 @app.route('/books/new/', methods=['GET', 'POST'])
 def newBook():
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-
     if request.method == 'GET':
         return h.render_new_book()
 
@@ -72,16 +68,11 @@ def newBook():
 
 
 # Edit book
+@d.require_authentication
 @app.route('/book/<int:book_id>/edit/', methods=['GET', 'POST'])
+@d.if_book_available('book_id')
+@d.if_authorized_for_book('book_id')
 def editBook(book_id):
-    if not dbh.get_book_by_id(book_id):
-        return h.render_book_not_found()
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-    if dbh.get_book_by_id(book_id).owner_id != current_user_id:
-        return h.render_not_authorized()
-
     if request.method == 'GET':
         return h.render_edit_book(book_id)
 
@@ -113,16 +104,11 @@ def editBook(book_id):
 
 
 # Delete book
+@d.require_authentication
 @app.route('/book/<int:book_id>/delete/', methods=['GET', 'POST'])
+@d.if_book_available('book_id')
+@d.if_authorized_for_book('book_id')
 def deleteBook(book_id):
-    if not dbh.get_book_by_id(book_id):
-        return h.render_book_not_found()
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-    if dbh.get_book_by_id(book_id).owner_id != current_user_id:
-        return h.render_not_authorized()
-
     if request.method == 'GET':
         return h.render_delete_book(book_id)
 
@@ -134,12 +120,10 @@ def deleteBook(book_id):
 
 
 # Like a book
+@d.require_authentication
 @app.route('/book/<int:book_id>/like/', methods=['GET', 'POST'])
+@d.if_book_available('book_id')
 def likeBook(book_id):
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-
     if request.method == 'GET':
         return h.render_book(book_id)
 
@@ -149,12 +133,10 @@ def likeBook(book_id):
 
 
 # Dislike a book
+@d.require_authentication
 @app.route('/book/<int:book_id>/dislike/', methods=['GET', 'POST'])
+@d.if_book_available('book_id')
 def dislikeBook(book_id):
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-
     if request.method == 'GET':
         return h.render_book(book_id)
 
@@ -171,6 +153,7 @@ def genres():
 
 # Show genre
 @app.route('/genre/<int:genre_id>/')
+@d.if_genre_available('genre_id')
 def genre(genre_id):
     if not dbh.get_genre_by_id(genre_id):
         return h.render_genre_not_found()
@@ -178,12 +161,9 @@ def genre(genre_id):
 
 
 # Show new genre
+@d.require_authentication
 @app.route('/genres/new/', methods=['GET', 'POST'])
 def newGenre():
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-
     if request.method == 'GET':
         return h.render_new_genre()
 
@@ -205,16 +185,11 @@ def newGenre():
 
 
 # Show edit genre
+@d.require_authentication
 @app.route('/genre/<int:genre_id>/edit/', methods=['GET', 'POST'])
+@d.if_genre_available('genre_id')
+@d.if_authorized_for_genre('genre_id')
 def editGenre(genre_id):
-    if not dbh.get_genre_by_id(genre_id):
-        return h.render_genre_not_found()
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-    if dbh.get_genre_by_id(genre_id).owner_id != current_user_id:
-        return h.render_not_authorized()
-
     if request.method == 'GET':
         return h.render_edit_genre(genre_id)
 
@@ -235,16 +210,11 @@ def editGenre(genre_id):
 
 
 # Delete genre
+@d.require_authentication
 @app.route('/genre/<int:genre_id>/delete/', methods=['GET', 'POST'])
+@d.if_genre_available('genre_id')
+@d.if_authorized_for_genre('genre_id')
 def deleteGenre(genre_id):
-    if not dbh.get_genre_by_id(genre_id):
-        return h.render_genre_not_found()
-    current_user_id = dbh.get_current_user_id()
-    if not current_user_id:
-        return h.render_not_authenticated()
-    if dbh.get_genre_by_id(genre_id).owner_id != current_user_id:
-        return h.render_not_authorized()
-
     if request.method == 'GET':
         return h.render_delete_genre(genre_id)
 
@@ -261,22 +231,16 @@ def users():
 
 # show user
 @app.route('/user/<int:user_id>/')
+@d.if_user_available('user_id')
 def user(user_id):
-    if not dbh.get_user_by_id(user_id):
-        return h.render_user_not_found()
     return h.render_user(user_id)
 
 # show user
+@d.require_authentication
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
+@d.if_user_available('user_id')
+@d.if_authorized_for_user('user_id')
 def editUser(user_id):
-    if not dbh.get_user_by_id(user_id):
-        return h.render_user_not_found()
-    if not dbh.get_user_by_id(user_id):
-        return h.render_user_not_found()
-    current_user_id = dbh.get_current_user_id()
-    if user_id != current_user_id:
-        return h.render_not_authorized()
-
     if request.method == 'GET':
         return h.render_edit_user(user_id)
 
