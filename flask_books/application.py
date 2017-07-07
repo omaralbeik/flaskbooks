@@ -346,11 +346,11 @@ def gDisconnect():
 
     if result['status'] == '200':
         h.clear_login_session()
-    	return h.redirect_books()
+        return h.redirect_books()
 
     else:
         h.clear_login_session()
-    	return h.json_response('Failed to revoke token for given user.', 400)
+        return h.json_response('Failed to revoke token for given user.', 400)
 
 
 
@@ -407,5 +407,5 @@ def userJSON(user_id):
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.register_error_handler(404, showError)
-    app.debug = True
-    app.run(host='0.0.0.0', port=5000)
+    app.debug = False
+    app.run(host='0.0.0.0')

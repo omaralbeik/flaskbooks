@@ -10,7 +10,7 @@ import dbhelpers as dbh
 
 def generate_auth_state():
     choice = string.ascii_uppercase + string.digits
-    state = ''.join(random.choice(choice) for x in xrange(32))
+    state = ''.join(random.choice(choice) for x in range(32))
     return state
 
 
