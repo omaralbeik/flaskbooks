@@ -1,0 +1,12 @@
+flask
+packaging
+oauth2client
+redis
+passlib
+flask-httpauth
+requests
+sqlalchemy
+flask-sqlalchemy
+sqlalchemy-utils
+bleach
+httplib2
