@@ -33,7 +33,7 @@ def create_user_from_login_session():
     user = get_user_by_email(email)
     if user:
         return user
-    user = create_user(email, name, picture_url)
+    user = create_user(email, name, picture_url, bio=None)
     return user
 
 

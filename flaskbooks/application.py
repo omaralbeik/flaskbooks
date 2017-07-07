@@ -9,6 +9,8 @@ import dbhelpers as dbh
 import decorators as d
 
 app = Flask(__name__)
+app.secret_key = 'super secret key'
+
 
 CLIENT_ID = json.load(open('client_secrets.json', 'r'))['web']['client_id']
 
@@ -296,7 +298,7 @@ def gConnect():
     url = ('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=%s'
            %access_token)
     http = httplib2.Http()
-    result = json.loads(http.request(url, 'GET')[1])
+    result = json.loads(http.request(url, 'GET')[1].decode())
 
     # If there was an error in the access token info, abort.
     error = result.get('error')
@@ -402,10 +404,7 @@ def userJSON(user_id):
         return h.json_response("User doesn't exist", 404)
     return jsonify(user.serialize)
 
-
-
 if __name__ == '__main__':
-    app.secret_key = 'super_secret_key'
     app.register_error_handler(404, showError)
     app.debug = False
     app.run(host='0.0.0.0')
