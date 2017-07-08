@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from model import Base, User, Genre, Book, Like, db_name
+from sqlalchemy_utils.functions import database_exists, drop_database
 
+from model import Base, User, Genre, Book, Like, db_name
 
 from application import login_session
 
@@ -11,6 +12,26 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#########################  Database Helper Functions  ##########################
+
+def create_db():
+    engine = create_engine(db_name)
+    Base.metadata.create_all(engine)
+    print("Database created!")
+
+
+def drop_db():
+    if database_exists(db_name):
+        drop_database(db_name)
+        print("Database dropped!")
+
+
+def reset_db():
+    session.query(User).delete()
+    session.query(Genre).delete()
+    session.query(Book).delete()
+    session.commit()
+    print("Database reseted!")
 
 
 ###########################  User Helper Functions  ############################

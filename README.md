@@ -3,10 +3,10 @@
   <img src="https://github.com/omaralbeik/flask-books/blob/master/screenshots/logo.jpg?raw=true" title="flask-books">
 </p>
 
-A very light social network for sharing books built using Flask
+A very light social network for sharing books built using Flask and Python 3
 
-# Live Demo
-## [http://books.omaralbeik.com/](http://books.omaralbeik.com/)
+# [Live Demo](http://books.omaralbeik.com/)
+[http://books.omaralbeik.com/](http://books.omaralbeik.com/)
 
 ## Main Features
 
@@ -36,7 +36,6 @@ A very light social network for sharing books built using Flask
 
 
 ## How to Run
-Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads) installed. This project uses a pre-congfigured Vagrant virtual machine which has all required packages installed.
 
 ### Setup a Google+ authentication app
 1. go to https://console.developers.google.com/project and login with your Google account.
@@ -50,28 +49,32 @@ Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.
 9. Rename the JSON file "client_secret.json"
 10. Replace the old client_secret.json file with yours
 
-### Setup the Database & Start the Server
+### Run on a Vagrant virtual machine:
+Please ensure you have [Python](https://www.python.org/), [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/wiki/Downloads) installed. This project uses a pre-congfigured Vagrant virtual machine which has all required packages installed.
+
 1. In the root directory, use the command `vagrant up`, this will install the vagrant machine.
 2. Once it's complete, type `vagrant ssh` to login to the VM.
-3. In the vm, `cd /vagrant/flask-books`
-5. type `python database_setup.py` this will create the empty database.
-6. type `python lots_of_books.py` this will fill the database with some pre-entered books and users.
-7. type `python application.py` to start the server.
+3. In the vm, `cd /vagrant/flaskbooks`
+4. type `make` to install dependencies and setup the database
+5. type `python3 application.py` to start the server.
+
+
+### Run on your Linux server:
+1. Use [this tutorial](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-16-04?utm_content=how-to-serve-flask-applications-with-uwsgi-and-nginx-on-ubuntu-16-04) from digitalocean to set up your Nginx and run the application on Ubuntu 16.04
+2. type `make` to install dependencies and setup the database
 
 ### Open in your browser
-Now you can open in a webpage by going to either: http://0.0.0.0:5000 or http://localhost:5000
+Now you can open in a webpage by going to either: http://0.0.0.0:5000, http://localhost:5000, or your set domain
 
 
 ## Project Structure
- - [static](https://github.com/omaralbeik/flask-books/tree/master/flask_books/static): Bootstrap, images, styles
- - [templates](https://github.com/omaralbeik/flask-books/tree/master/flask_books/templates): html templates
- - [application.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/application.py): Flask application
- - [client_secrets.json](https://github.com/omaralbeik/flask-books/blob/master/flask_books/client_secrets.json): Google client secrets / **replace this with yours**
- - [database_setup.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/database_setup.py): set up database for the first time
- - [dbhelpers.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/dbhelpers.py): common helper functions for database objects
- - [helpers.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/helpers.py): common helper functions
- - [lots_of_books.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/lots_of_books.py): creates some books, for testing
- - [model.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/model.py): data model objects
+ - [static](https://github.com/omaralbeik/flask-books/tree/master/static): Bootstrap, images, styles
+ - [templates](https://github.com/omaralbeik/flask-books/tree/master/templates): html templates
+ - [application.py](https://github.com/omaralbeik/flask-books/blob/master/application.py): Flask application
+ - [client_secrets.json](https://github.com/omaralbeik/flask-books/blob/master/client_secrets.json): Google client secrets / **replace this with yours**
+ - [dbhelpers.py](https://github.com/omaralbeik/flask-books/blob/master/dbhelpers.py): common helper functions for database objects
+ - [helpers.py](https://github.com/omaralbeik/flask-books/blob/master/helpers.py): common helper functions
+ - [model.py](https://github.com/omaralbeik/flask-books/blob/master/model.py): data model objects
 
 
 ## Data Model
@@ -84,7 +87,7 @@ flask-books stores data using [SQLite3](https://www.sqlite.org/) and [SQLAlchemy
 - Like
 
 ### Model Diagram
-[model.py](https://github.com/omaralbeik/flask-books/blob/master/flask_books/model.py)
+[model.py](https://github.com/omaralbeik/flask-books/blob/master/model.py)
 <p align="left">
   <img src="https://github.com/omaralbeik/flask-books/blob/master/screenshots/model.jpg?raw=true" title="model">
 </p>

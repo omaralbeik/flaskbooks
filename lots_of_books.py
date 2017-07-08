@@ -104,4 +104,4 @@ books = [book1, book2, book3, book4, book5, book6]
 session.add_all(books)
 session.commit()
 
-print("Added lots of books!")
+print("Lots of books added!")
