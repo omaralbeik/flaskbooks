@@ -5,9 +5,6 @@
 
 A very light social network for sharing books built using Flask and Python 3
 
-# [Live Demo](http://books.omaralbeik.com/)
-[http://books.omaralbeik.com/](http://books.omaralbeik.com/)
-
 ## Main Features
 
 ### Web Endpoints
